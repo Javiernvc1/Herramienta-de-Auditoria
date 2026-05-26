@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "javier",
+    "password": "admin",
+    "database": "tesis",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "javier",
+    "password": "admin",
+    "database": "tesis",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "javier",
+    "password": "admin",
+    "database": "tesis",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
