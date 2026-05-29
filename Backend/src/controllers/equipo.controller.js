@@ -105,10 +105,58 @@ async function deleteEquipo(req, res) {
   }
 }
 
+// Asociar equipo a empresa
+async function assignEmpresa(req, res) {
+  try {
+
+    const { idEquipo, idEmpresa } = req.params;
+
+    const [result, error] = await EquipoService.assignEmpresa(
+      idEquipo,
+      idEmpresa
+    );
+
+    if (error) {
+      return respondError(req, res, 400, error);
+    }
+
+    respondSuccess(req, res, 200, result);
+
+  } catch (error) {
+    handleError(error, "equipo.controller -> assignEmpresa");
+    respondError(req, res, 500, "No se pudo asociar la empresa al equipo");
+  }
+}
+
+// Eliminar asociación empresa-equipo
+async function removeEmpresa(req, res) {
+  try {
+
+    const { idEquipo, idEmpresa } = req.params;
+
+    const [result, error] = await EquipoService.removeEmpresa(
+      idEquipo,
+      idEmpresa
+    );
+
+    if (error) {
+      return respondError(req, res, 400, error);
+    }
+
+    respondSuccess(req, res, 200, result);
+
+  } catch (error) {
+    handleError(error, "equipo.controller -> removeEmpresa");
+    respondError(req, res, 500, "No se pudo eliminar la asociación");
+  }
+}
+
 module.exports = {
   getEquipos,
   getEquipoById,
   createEquipo,
   updateEquipo,
   deleteEquipo,
+  assignEmpresa,
+  removeEmpresa
 };

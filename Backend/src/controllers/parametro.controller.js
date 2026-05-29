@@ -105,10 +105,48 @@ async function deleteParametro(req, res) {
   }
 }
 
+async function assignControl(req, res) {
+  try {
+    const { id, id_control } = req.params;
+
+    const [parametro, errorParametro] = await ParametroService.assignControl(id, id_control);
+
+    if (errorParametro) {
+      return respondError(req, res, 400, errorParametro);
+    }
+
+    respondSuccess(req, res, 200, "Control asignado al parámetro exitosamente");
+
+  } catch (error) {
+    handleError(error, "parametro.controller -> assignControl");
+    respondError(req, res, 500, "No se pudo asignar el control al parámetro");
+  }
+}
+
+async function removeControl(req, res) {
+  try {
+    const { id, id_control } = req.params;
+
+    const [parametro, errorParametro] = await ParametroService.removeControl(id, id_control);
+
+    if (errorParametro) {
+      return respondError(req, res, 400, errorParametro);
+    }
+
+    respondSuccess(req, res, 200, "Control eliminado del parámetro exitosamente");
+
+  } catch (error) {
+    handleError(error, "parametro.controller -> removeControl");
+    respondError(req, res, 500, "No se pudo eliminar el control del parámetro");
+  }
+}
+
 module.exports = {
   getParametros,
   getParametroById,
   createParametro,
   updateParametro,
   deleteParametro,
+  assignControl,
+  removeControl
 };

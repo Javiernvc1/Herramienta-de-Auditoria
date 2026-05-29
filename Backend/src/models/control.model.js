@@ -12,14 +12,6 @@ const Control = sequelize.define("Control", {
     type: DataTypes.STRING,
     allowNull: false
   },
-  id_marco: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "marcos",
-      key: "id_marco"
-    }
-  }
 }, {
   tableName: "controles",
   timestamps: false

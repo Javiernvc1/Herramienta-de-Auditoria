@@ -10,12 +10,6 @@ require("../models/user.model.js");
 require('../models/relations.model.js');
 require("../models/relations.model");
 
-//const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-//  host: HOST,
-//  port: DB_PORT,
-//  dialect: 'postgres',
-//  logging: false,
-//});
 
 
 async function setupDB() {

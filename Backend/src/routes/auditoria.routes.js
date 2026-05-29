@@ -49,4 +49,47 @@ router.delete(
   auditoriaController.deleteAuditoria
 );
 
+router.post(
+  "/:id/empresa/:idEmpresa",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  auditoriaController.assignEmpresa
+);
+
+router.delete(
+  "/:id/empresa/:idEmpresa",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  auditoriaController.removeEmpresa
+);
+
+router.post(
+  "/:id/usuario/:idUsuario",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  auditoriaController.assignUser
+);
+
+router.delete(
+  "/:id/usuario/:idUsuario",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  auditoriaController.removeUser
+);
+
+router.post(
+  "/:id/marco/:marcoId",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  auditoriaController.assignMarco
+);
+
+router.delete(
+  "/:id/marco/:marcoId",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  auditoriaController.removeMarco
+);
+
+
 module.exports = router;

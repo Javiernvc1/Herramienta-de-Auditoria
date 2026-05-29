@@ -105,10 +105,79 @@ async function deleteControl(req, res) {
   }
 }
 
+// Asociar marco a control
+async function assignMarco(req, res) {
+  try {
+
+    const { id, marcoId } = req.params;
+
+    const [control, errorControl] =
+      await ControlService.assignMarco(id, marcoId);
+
+    if (errorControl) {
+      return respondError(req, res, 400, errorControl);
+    }
+
+    respondSuccess(
+      req,
+      res,
+      200,
+      "Marco asociado correctamente al control"
+    );
+
+  } catch (error) {
+
+    handleError(error, "control.controller -> assignMarco");
+
+    respondError(
+      req,
+      res,
+      500,
+      "No se pudo asociar el marco al control"
+    );
+  }
+}
+
+// Desasociar marco de control
+async function removeMarco(req, res) {
+  try {
+
+    const { id, marcoId } = req.params;
+
+    const [control, errorControl] =
+      await ControlService.removeMarco(id, marcoId);
+
+    if (errorControl) {
+      return respondError(req, res, 400, errorControl);
+    }
+
+    respondSuccess(
+      req,
+      res,
+      200,
+      "Marco removido correctamente del control"
+    );
+
+  } catch (error) {
+
+    handleError(error, "control.controller -> removeMarco");
+
+    respondError(
+      req,
+      res,
+      500,
+      "No se pudo remover el marco del control"
+    );
+  }
+}
+
+
 module.exports = {
   getControles,
   getControlById,
   createControl,
   updateControl,
   deleteControl,
+  assignMarco,
+  removeMarco
 };

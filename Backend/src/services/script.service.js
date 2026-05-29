@@ -58,33 +58,24 @@ async function createScript(data) {
       nombre,
       tipo,
       ruta,
-      comando,
-      id_parametro
+      comando
     } = data;
-
-    const parametroFound = await Parametro.findByPk(id_parametro);
-
-    if (!parametroFound) {
-      return [null, "El parámetro no existe"];
-    }
 
     const scriptFound = await Script.findOne({
       where: {
-        nombre,
-        id_parametro
+        nombre
       }
     });
 
-    if (scriptFound) {
-      return [null, "El script ya existe para este parámetro"];
-    }
+      if (scriptFound) {
+        return [null, "El script ya existe"];
+      }
 
     const newScript = await Script.create({
       nombre,
       tipo,
       ruta,
       comando,
-      id_parametro
     });
 
     return [newScript, null];
@@ -103,8 +94,7 @@ async function updateScript(id, data) {
       nombre,
       descripcion,
       contenido,
-      lenguaje,
-      id_parametro
+      lenguaje
     } = data;
 
     const script = await Script.findByPk(id);
@@ -113,18 +103,11 @@ async function updateScript(id, data) {
       return [null, "El script no existe"];
     }
 
-    const parametroFound = await Parametro.findByPk(id_parametro);
-
-    if (!parametroFound) {
-      return [null, "El parámetro no existe"];
-    }
-
     await script.update({
       nombre,
       descripcion,
       contenido,
-      lenguaje,
-      id_parametro
+      lenguaje
     });
 
     return [script, null];
@@ -152,10 +135,58 @@ async function deleteScript(id) {
   }
 }
 
+async function assignParametro(scriptId, parametroId) {
+  try {
+    const script = await Script.findByPk(scriptId);
+
+    if (!script) {
+      return [null, "El script no existe"];
+    }
+
+    const parametro = await Parametro.findByPk(parametroId);
+    if (!parametro) {
+      return [null, "El parámetro no existe"];
+    }
+
+    await script.addParametro(parametro);
+
+    return [script, null];
+  } catch (error) {
+    handleError(error, "script.service -> assignParametro");
+  }
+}
+
+async function removeParametro(scriptId, parametroId) {
+  try {
+    const script = await Script.findByPk(scriptId);
+
+    if (!script) {
+      return [null, "El script no existe"];
+    }
+
+    const parametro = await Parametro.findByPk(parametroId);
+    if (!parametro) {
+      return [null, "El parámetro no existe"];
+    }
+
+    await script.removeParametro(parametro);
+
+    return [script, null];
+  } catch (error) {
+    handleError(error, "script.service -> removeParametro");
+  }
+}
+
+
+
+
+
 module.exports = {
   getScripts,
   getScriptById,
   createScript,
   updateScript,
   deleteScript,
+  assignParametro,
+  removeParametro
 };

@@ -105,10 +105,52 @@ async function deleteScript(req, res) {
   }
 }
 
+
+async function assignParametro(req, res) {
+  try {
+    const { scriptId, parametroId } = req.params;
+
+    const [result, error] = await ScriptService.assignParametro(scriptId, parametroId);
+
+    if (error) {
+      return respondError(req, res, 400, error);
+    }
+
+    respondSuccess(req, res, 200, "Parámetro asignado al script exitosamente");
+    
+  } catch (error) {
+    handleError(error, "script.controller -> assignParametro");
+    respondError(req, res, 500, "No se pudo asignar el parámetro al script");
+  }
+}
+
+async function removeParametro(req, res) {
+  try {
+    const { scriptId, parametroId } = req.params;
+
+    const [result, error] = await ScriptService.removeParametro(scriptId, parametroId);
+
+    if (error) {
+      return respondError(req, res, 400, error);
+    }
+
+    respondSuccess(req, res, 200, "Parámetro removido del script exitosamente");
+
+  } catch (error) {
+    handleError(error, "script.controller -> removeParametro");
+    respondError(req, res, 500, "No se pudo remover el parámetro del script");
+  }
+}
+
+
+
 module.exports = {
   getScripts,
   getScriptById,
   createScript,
   updateScript,
   deleteScript,
+  assignParametro,
+  removeParametro
+
 };

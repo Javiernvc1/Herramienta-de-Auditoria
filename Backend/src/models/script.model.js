@@ -26,14 +26,6 @@ const Script = sequelize.define("Script", {
   comando: {
     type: DataTypes.TEXT,
     allowNull: false
-  },
-  id_parametro: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "parametros",
-      key: "id_parametro"
-    }
   }
 }, {
   tableName: "scripts",

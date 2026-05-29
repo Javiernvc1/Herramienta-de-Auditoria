@@ -1,6 +1,7 @@
 "use strict";
 
 const Empresa = require("../models/empresa.model");
+const Equipo = require("../models/equipo.model");
 const { handleError } = require("../utils/errorHandler");
 
 /**
@@ -8,7 +9,13 @@ const { handleError } = require("../utils/errorHandler");
  */
 async function getEmpresas() {
   try {
-    const empresas = await Empresa.findAll();
+    const empresas = await Empresa.findAll({
+      include: {
+        model: Equipo,
+        through: { attributes: [] },
+        attributes: ["id_equipo", "nombreOS", "hostname", "ip"]
+      }
+    });
 
     if (!empresas || empresas.length === 0) {
       return [null, "No hay empresas registradas"];
@@ -25,7 +32,13 @@ async function getEmpresas() {
  */
 async function getEmpresaById(id) {
   try {
-    const empresa = await Empresa.findByPk(id);
+    const empresa = await Empresa.findByPk(id, {
+      include: {
+        model: Equipo,
+        through: { attributes: [] },
+        attributes: ["id_equipo", "nombreOS", "hostname", "ip"]
+      }
+    });
 
     if (!empresa) {
       return [null, "La empresa no existe"];

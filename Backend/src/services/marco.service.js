@@ -9,7 +9,13 @@ const { handleError } = require("../utils/errorHandler");
  */
 async function getMarcos() {
   try {
-    const marcos = await Marco.findAll();
+    const marcos = await Marco.findAll({
+      include: {
+        model: Control,
+        through: { attributes: [] },
+        attributes: ["id_control", "nombre"]
+      }
+    });
 
     if (!marcos || marcos.length === 0) {
       return [null, "No hay marcos registrados"];
@@ -26,7 +32,13 @@ async function getMarcos() {
  */
 async function getMarcoById(id) {
   try {
-    const marco = await Marco.findByPk(id);
+    const marco = await Marco.findByPk(id, {
+      include: {
+        model: Control,
+        through: { attributes: [] },
+        attributes: ["id_control", "nombre"]
+      }
+    });
 
     if (!marco) {
       return [null, "El marco no existe"];

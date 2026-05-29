@@ -49,4 +49,14 @@ router.delete(
   controlController.deleteControl
 );
 
+router.post(
+  "/:id/marcos/:marcoId",
+  controlController.assignMarco
+);
+
+router.delete(
+  "/:id/marcos/:marcoId",
+  controlController.removeMarco
+);
+
 module.exports = router;

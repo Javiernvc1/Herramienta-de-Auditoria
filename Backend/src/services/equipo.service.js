@@ -10,9 +10,11 @@ const { handleError } = require("../utils/errorHandler");
  */
 async function getEquipos() {
   try {
+
     const equipos = await Equipo.findAll({
       include: {
         model: Empresa,
+        through: { attributes: [] },
         attributes: ["id_empresa", "nombre"]
       }
     });
@@ -22,6 +24,7 @@ async function getEquipos() {
     }
 
     return [equipos, null];
+
   } catch (error) {
     handleError(error, "equipo.service -> getEquipos");
   }
@@ -32,9 +35,11 @@ async function getEquipos() {
  */
 async function getEquipoById(id) {
   try {
+
     const equipo = await Equipo.findByPk(id, {
       include: {
         model: Empresa,
+        through: { attributes: [] },
         attributes: ["id_empresa", "nombre"]
       }
     });
@@ -44,6 +49,7 @@ async function getEquipoById(id) {
     }
 
     return [equipo, null];
+
   } catch (error) {
     handleError(error, "equipo.service -> getEquipoById");
   }
@@ -54,19 +60,12 @@ async function getEquipoById(id) {
  */
 async function createEquipo(data) {
   try {
+
     const {
-      nombre,
-      tipo,
-      ip,
-      sistema_operativo,
-      id_empresa
+      nombreOS,
+      hostname,
+      ip
     } = data;
-
-    const empresaFound = await Empresa.findByPk(id_empresa);
-
-    if (!empresaFound) {
-      return [null, "La empresa no existe"];
-    }
 
     const equipoFound = await Equipo.findOne({
       where: { ip }
@@ -77,14 +76,13 @@ async function createEquipo(data) {
     }
 
     const newEquipo = await Equipo.create({
-      nombre,
-      tipo,
-      ip,
-      sistema_operativo,
-      id_empresa
+      nombreOS,
+      hostname,
+      ip
     });
 
     return [newEquipo, null];
+
   } catch (error) {
     handleError(error, "equipo.service -> createEquipo");
   }
@@ -95,12 +93,11 @@ async function createEquipo(data) {
  */
 async function updateEquipo(id, data) {
   try {
+
     const {
-      nombre,
-      tipo,
-      ip,
-      sistema_operativo,
-      id_empresa
+      nombreOS,
+      hostname,
+      ip
     } = data;
 
     const equipo = await Equipo.findByPk(id);
@@ -109,21 +106,14 @@ async function updateEquipo(id, data) {
       return [null, "El equipo no existe"];
     }
 
-    const empresaFound = await Empresa.findByPk(id_empresa);
-
-    if (!empresaFound) {
-      return [null, "La empresa no existe"];
-    }
-
     await equipo.update({
-      nombre,
-      tipo,
-      ip,
-      sistema_operativo,
-      id_empresa
+      nombreOS,
+      hostname,
+      ip
     });
 
     return [equipo, null];
+
   } catch (error) {
     handleError(error, "equipo.service -> updateEquipo");
   }
@@ -134,6 +124,7 @@ async function updateEquipo(id, data) {
  */
 async function deleteEquipo(id) {
   try {
+
     const equipo = await Equipo.findByPk(id);
 
     if (!equipo) {
@@ -143,8 +134,63 @@ async function deleteEquipo(id) {
     await equipo.destroy();
 
     return [equipo, null];
+
   } catch (error) {
     handleError(error, "equipo.service -> deleteEquipo");
+  }
+}
+
+/**
+ * Asociar equipo a empresa
+ */
+async function assignEmpresa(idEquipo, idEmpresa) {
+  try {
+
+    const equipo = await Equipo.findByPk(idEquipo);
+
+    if (!equipo) {
+      return [null, "El equipo no existe"];
+    }
+
+    const empresa = await Empresa.findByPk(idEmpresa);
+
+    if (!empresa) {
+      return [null, "La empresa no existe"];
+    }
+
+    await equipo.addEmpresa(empresa);
+
+    return ["Equipo asociado correctamente", null];
+
+  } catch (error) {
+    handleError(error, "equipo.service -> assignEmpresa");
+  }
+}
+
+/**
+ * Quitar asociación empresa-equipo
+ */
+async function removeEmpresa(idEquipo, idEmpresa) {
+  try {
+
+    const equipo = await Equipo.findByPk(idEquipo);
+
+    if (!equipo) {
+      return [null, "El equipo no existe"];
+    }
+
+    const empresa = await Empresa.findByPk(idEmpresa);
+
+    if (!empresa) {
+      return [null, "La empresa no existe"];
+    }
+
+    await equipo.removeEmpresa(empresa);
+
+    return ["Asociación eliminada correctamente", null];
+
+  } catch (error) {
+    handleError(error, "equipo.service -> removeEmpresa");
   }
 }
 
@@ -154,4 +200,6 @@ module.exports = {
   createEquipo,
   updateEquipo,
   deleteEquipo,
+  assignEmpresa,
+  removeEmpresa
 };

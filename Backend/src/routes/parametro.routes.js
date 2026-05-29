@@ -49,4 +49,14 @@ router.delete(
   parametroController.deleteParametro
 );
 
+router.post(
+  "/:id/controles/:controlId",
+  parametroController.assignControl
+);
+
+router.delete(
+  "/:id/controles/:controlId",
+  parametroController.removeControl
+);
+
 module.exports = router;

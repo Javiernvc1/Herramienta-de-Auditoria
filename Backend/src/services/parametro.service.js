@@ -13,6 +13,7 @@ async function getParametros() {
     const parametros = await Parametro.findAll({
       include: {
         model: Control,
+        through: { attributes: [] },
         attributes: ["id_control", "nombre"]
       }
     });
@@ -35,6 +36,7 @@ async function getParametroById(id) {
     const parametro = await Parametro.findByPk(id, {
       include: {
         model: Control,
+        through: { attributes: [] },
         attributes: ["id_control", "nombre"]
       }
     });
@@ -58,7 +60,6 @@ async function createParametro(data) {
       nombre,
       descripcion,
       valor_esperado,
-      id_control
     } = data;
 
     const controlFound = await Control.findByPk(id_control);
@@ -69,8 +70,7 @@ async function createParametro(data) {
 
     const parametroFound = await Parametro.findOne({
       where: {
-        nombre,
-        id_control
+        nombre
       }
     });
 
@@ -81,9 +81,9 @@ async function createParametro(data) {
     const newParametro = await Parametro.create({
       nombre,
       descripcion,
-      valor_esperado,
-      id_control
+      valor_esperado
     });
+
 
     return [newParametro, null];
   } catch (error) {
@@ -100,7 +100,6 @@ async function updateParametro(id, data) {
       nombre,
       descripcion,
       valor_esperado,
-      id_control
     } = data;
 
     const parametro = await Parametro.findByPk(id);
@@ -119,7 +118,6 @@ async function updateParametro(id, data) {
       nombre,
       descripcion,
       valor_esperado,
-      id_control
     });
 
     return [parametro, null];
@@ -147,10 +145,57 @@ async function deleteParametro(id) {
   }
 }
 
+async function assignControl(parametroId, controlId) {
+  try {
+    const parametro = await Parametro.findByPk(parametroId);
+    if (!parametro) {
+      return [null, "El parámetro no existe"];
+    }
+
+    const control = await Control.findByPk(controlId);
+    if (!control) {
+      return [null, "El control no existe"];
+    }
+
+    await parametro.addControl(control);
+
+    return [parametro, null];
+
+  } catch (error) {
+    handleError(error, "parametro.service -> assignControl");
+  }
+}
+
+async function removeControl(parametroId, controlId) {
+  try {
+    const parametro = await Parametro.findByPk(parametroId);
+    if (!parametro) {
+      return [null, "El parámetro no existe"];
+    }
+    const control = await Control.findByPk(controlId);
+    if (!control) {
+      return [null, "El control no existe"];
+    }
+    await parametro.removeControl(control);
+
+    return [parametro, null];
+
+  } catch (error) {
+    handleError(error, "parametro.service -> removeControl");
+  }
+}
+
+
+
+
+
+
 module.exports = {
   getParametros,
   getParametroById,
   createParametro,
   updateParametro,
   deleteParametro,
+  assignControl,
+  removeControl
 };

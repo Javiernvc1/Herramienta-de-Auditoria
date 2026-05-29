@@ -13,6 +13,7 @@ async function getControles() {
     const controles = await Control.findAll({
       include: {
         model: Marco,
+        through: { attributes: [] },
         attributes: ["id_marco", "nombre"]
       }
     });
@@ -22,6 +23,7 @@ async function getControles() {
     }
 
     return [controles, null];
+
   } catch (error) {
     handleError(error, "control.service -> getControles");
   }
@@ -35,6 +37,7 @@ async function getControlById(id) {
     const control = await Control.findByPk(id, {
       include: {
         model: Marco,
+        through: { attributes: [] },
         attributes: ["id_marco", "nombre"]
       }
     });
@@ -44,6 +47,7 @@ async function getControlById(id) {
     }
 
     return [control, null];
+
   } catch (error) {
     handleError(error, "control.service -> getControlById");
   }
@@ -54,36 +58,27 @@ async function getControlById(id) {
  */
 async function createControl(data) {
   try {
+
     const {
       nombre,
-      descripcion,
-      id_marco
+      descripcion
     } = data;
 
-    const marcoFound = await Marco.findByPk(id_marco);
-
-    if (!marcoFound) {
-      return [null, "El marco no existe"];
-    }
-
     const controlFound = await Control.findOne({
-      where: {
-        nombre,
-        id_marco
-      }
+      where: { nombre }
     });
 
     if (controlFound) {
-      return [null, "El control ya existe en este marco"];
+      return [null, "El control ya existe"];
     }
 
     const newControl = await Control.create({
       nombre,
-      descripcion,
-      id_marco
+      descripcion
     });
 
     return [newControl, null];
+
   } catch (error) {
     handleError(error, "control.service -> createControl");
   }
@@ -94,10 +89,10 @@ async function createControl(data) {
  */
 async function updateControl(id, data) {
   try {
+
     const {
       nombre,
-      descripcion,
-      id_marco
+      descripcion
     } = data;
 
     const control = await Control.findByPk(id);
@@ -106,19 +101,13 @@ async function updateControl(id, data) {
       return [null, "El control no existe"];
     }
 
-    const marcoFound = await Marco.findByPk(id_marco);
-
-    if (!marcoFound) {
-      return [null, "El marco no existe"];
-    }
-
     await control.update({
       nombre,
-      descripcion,
-      id_marco
+      descripcion
     });
 
     return [control, null];
+
   } catch (error) {
     handleError(error, "control.service -> updateControl");
   }
@@ -129,6 +118,7 @@ async function updateControl(id, data) {
  */
 async function deleteControl(id) {
   try {
+
     const control = await Control.findByPk(id);
 
     if (!control) {
@@ -138,10 +128,56 @@ async function deleteControl(id) {
     await control.destroy();
 
     return [control, null];
+
   } catch (error) {
     handleError(error, "control.service -> deleteControl");
   }
 }
+
+async function assignMarco(controlId, marcoId) {
+  try {
+
+    const control = await Control.findByPk(controlId);
+    if (!control) {
+      return [null, "El control no existe"];
+    }
+
+    const marco = await Marco.findByPk(marcoId);
+    if (!marco) {
+      return [null, "El marco no existe"];
+    }
+
+    await control.addMarco(marco);
+
+    return [control, null];
+
+  } catch (error) {
+    handleError(error, "control.service -> assignMarco");
+  }
+}
+
+async function removeMarco(controlId, marcoId) {
+  try {
+
+    const control = await Control.findByPk(controlId);
+    if (!control) {
+      return [null, "El control no existe"];
+    }
+
+    const marco = await Marco.findByPk(marcoId);
+    if (!marco) {
+      return [null, "El marco no existe"];
+    }
+
+    await control.removeMarco(marco);
+
+    return [control, null];
+
+  } catch (error) {
+    handleError(error, "control.service -> removeMarco");
+  }
+}
+
 
 module.exports = {
   getControles,
@@ -149,4 +185,6 @@ module.exports = {
   createControl,
   updateControl,
   deleteControl,
+  assignMarco,
+  removeMarco
 };

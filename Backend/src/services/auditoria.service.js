@@ -2,7 +2,6 @@
 
 const Auditoria = require("../models/auditoria.model");
 const Empresa = require("../models/empresa.model");
-const Equipo = require("../models/equipo.model");
 const User = require("../models/user.model");
 const Marco = require("../models/marco.model");
 
@@ -17,19 +16,18 @@ async function getAuditorias() {
       include: [
         {
           model: Empresa,
+          through: { attributes: [] },
           attributes: ["id_empresa", "nombre"]
         },
         {
-          model: Equipo,
-          attributes: ["id_equipo", "nombre"]
-        },
-        {
           model: User,
+          through: { attributes: [] },
           attributes: ["id", "nombre", "apellido", "email"]
         },
         {
           model: Marco,
-          through: { attributes: [] }
+          through: { attributes: [] },
+          attributes: ["id_marco", "nombre"]
         }
       ]
     });
@@ -39,6 +37,7 @@ async function getAuditorias() {
     }
 
     return [auditorias, null];
+
   } catch (error) {
     handleError(error, "auditoria.service -> getAuditorias");
   }
@@ -53,19 +52,18 @@ async function getAuditoriaById(id) {
       include: [
         {
           model: Empresa,
+          through: { attributes: [] },
           attributes: ["id_empresa", "nombre"]
         },
         {
-          model: Equipo,
-          attributes: ["id_equipo", "nombre"]
-        },
-        {
           model: User,
+          through: { attributes: [] },
           attributes: ["id", "nombre", "apellido", "email"]
         },
         {
           model: Marco,
-          through: { attributes: [] }
+          through: { attributes: [] },
+          attributes: ["id_marco", "nombre"]
         }
       ]
     });
@@ -75,6 +73,7 @@ async function getAuditoriaById(id) {
     }
 
     return [auditoria, null];
+
   } catch (error) {
     handleError(error, "auditoria.service -> getAuditoriaById");
   }
@@ -85,56 +84,15 @@ async function getAuditoriaById(id) {
  */
 async function createAuditoria(data) {
   try {
-    const {
-      nombre,
-      descripcion,
-      fecha_inicio,
-      fecha_fin,
-      estado,
-      id_empresa,
-      id_equipo,
-      id_usuario,
-      marcos
-    } = data;
 
-    const empresaFound = await Empresa.findByPk(id_empresa);
-    if (!empresaFound) {
-      return [null, "La empresa no existe"];
-    }
-
-    const equipoFound = await Equipo.findByPk(id_equipo);
-    if (!equipoFound) {
-      return [null, "El equipo no existe"];
-    }
-
-    const userFound = await User.findByPk(id_usuario);
-    if (!userFound) {
-      return [null, "El usuario no existe"];
-    }
+    const { fecha } = data;
 
     const newAuditoria = await Auditoria.create({
-      nombre,
-      descripcion,
-      fecha_inicio,
-      fecha_fin,
-      estado,
-      id_empresa,
-      id_equipo,
-      id_usuario
+      fecha
     });
 
-    // Relación muchos a muchos con marcos
-    if (marcos && marcos.length > 0) {
-      const marcosFound = await Marco.findAll({
-        where: {
-          id_marco: marcos
-        }
-      });
-
-      await newAuditoria.setMarcos(marcosFound);
-    }
-
     return [newAuditoria, null];
+
   } catch (error) {
     handleError(error, "auditoria.service -> createAuditoria");
   }
@@ -145,17 +103,8 @@ async function createAuditoria(data) {
  */
 async function updateAuditoria(id, data) {
   try {
-    const {
-      nombre,
-      descripcion,
-      fecha_inicio,
-      fecha_fin,
-      estado,
-      id_empresa,
-      id_equipo,
-      id_usuario,
-      marcos
-    } = data;
+
+    const { fecha } = data;
 
     const auditoria = await Auditoria.findByPk(id);
 
@@ -164,28 +113,11 @@ async function updateAuditoria(id, data) {
     }
 
     await auditoria.update({
-      nombre,
-      descripcion,
-      fecha_inicio,
-      fecha_fin,
-      estado,
-      id_empresa,
-      id_equipo,
-      id_usuario
+      fecha
     });
 
-    // Actualizar marcos relacionados
-    if (marcos) {
-      const marcosFound = await Marco.findAll({
-        where: {
-          id_marco: marcos
-        }
-      });
-
-      await auditoria.setMarcos(marcosFound);
-    }
-
     return [auditoria, null];
+
   } catch (error) {
     handleError(error, "auditoria.service -> updateAuditoria");
   }
@@ -196,6 +128,7 @@ async function updateAuditoria(id, data) {
  */
 async function deleteAuditoria(id) {
   try {
+
     const auditoria = await Auditoria.findByPk(id);
 
     if (!auditoria) {
@@ -205,10 +138,157 @@ async function deleteAuditoria(id) {
     await auditoria.destroy();
 
     return [auditoria, null];
+
   } catch (error) {
     handleError(error, "auditoria.service -> deleteAuditoria");
   }
 }
+
+async function assignEmpresa(auditoriaId, empresaId) {
+  try {
+
+    const auditoria = await Auditoria.findByPk(auditoriaId);
+
+    if (!auditoria) {
+      return [null, "La auditoría no existe"];
+    }
+
+    const empresa = await Empresa.findByPk(empresaId);
+
+    if (!empresa) {
+      return [null, "La empresa no existe"];
+    }
+
+    await auditoria.addEmpresa(empresa);
+
+    return [auditoria, null];
+
+  } catch (error) {
+    handleError(error, "auditoria.service -> assignEmpresa");
+  }
+}
+
+async function removeEmpresa(auditoriaId, empresaId) {
+  try {
+
+    const auditoria = await Auditoria.findByPk(auditoriaId);
+
+    if (!auditoria) {
+      return [null, "La auditoría no existe"];
+    }
+
+    const empresa = await Empresa.findByPk(empresaId);
+
+    if (!empresa) {
+      return [null, "La empresa no existe"];
+    }
+
+    await auditoria.removeEmpresa(empresa);
+
+    return [auditoria, null];
+
+  } catch (error) {
+    handleError(error, "auditoria.service -> removeEmpresa");
+  }
+}
+
+async function assignUsuario(auditoriaId, usuarioId) {
+  try {
+
+    const auditoria = await Auditoria.findByPk(auditoriaId);
+
+    if (!auditoria) {
+      return [null, "La auditoría no existe"];
+    }
+
+    const usuario = await User.findByPk(usuarioId);
+
+    if (!usuario) {
+      return [null, "El usuario no existe"];
+    }
+
+    await auditoria.addUser(usuario);
+
+    return [auditoria, null];
+
+  } catch (error) {
+    handleError(error, "auditoria.service -> assignUsuario");
+  }
+}
+
+async function removeUsuario(auditoriaId, usuarioId) {
+  try {
+
+    const auditoria = await Auditoria.findByPk(auditoriaId);
+
+    if (!auditoria) {
+      return [null, "La auditoría no existe"];
+    }
+
+    const usuario = await User.findByPk(usuarioId);
+
+    if (!usuario) {
+      return [null, "El usuario no existe"];
+    }
+
+    await auditoria.removeUser(usuario);
+
+    return [auditoria, null];
+
+  } catch (error) {
+    handleError(error, "auditoria.service -> removeUsuario");
+  }
+}
+
+async function assignMarco(auditoriaId, marcoId) {
+  try {
+
+    const auditoria = await Auditoria.findByPk(auditoriaId);
+
+    if (!auditoria) {
+      return [null, "La auditoría no existe"];
+    }
+
+    const marco = await Marco.findByPk(marcoId);
+
+    if (!marco) {
+      return [null, "El marco no existe"];
+    }
+
+    await auditoria.addMarco(marco);
+
+    return [auditoria, null];
+
+  } catch (error) {
+    handleError(error, "auditoria.service -> assignMarco");
+  }
+}
+
+async function removeMarco(auditoriaId, marcoId) {
+  try {
+
+    const auditoria = await Auditoria.findByPk(auditoriaId);
+
+    if (!auditoria) {
+      return [null, "La auditoría no existe"];
+    }
+
+    const marco = await Marco.findByPk(marcoId);
+
+    if (!marco) {
+      return [null, "El marco no existe"];
+    }
+
+    await auditoria.removeMarco(marco);
+
+    return [auditoria, null];
+
+  } catch (error) {
+    handleError(error, "auditoria.service -> removeMarco");
+  }
+}
+
+
 
 module.exports = {
   getAuditorias,
@@ -216,4 +296,10 @@ module.exports = {
   createAuditoria,
   updateAuditoria,
   deleteAuditoria,
+  assignEmpresa,
+  removeEmpresa,
+  assignUsuario,
+  removeUsuario,
+  assignMarco,
+  removeMarco
 };

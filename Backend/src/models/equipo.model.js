@@ -12,6 +12,10 @@ const Equipo = sequelize.define("Equipo", {
     type: DataTypes.STRING,
     allowNull: false
   },
+  hostname: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
 
   ip: {
     type: DataTypes.STRING,

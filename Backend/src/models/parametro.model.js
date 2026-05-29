@@ -21,15 +21,6 @@ const Parametro = sequelize.define("Parametro", {
   valor_esperado: {
     type: DataTypes.STRING,
     allowNull: false
-  },
-
-  id_control: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "controles",
-      key: "id_control"
-    }
   }
 
 }, {

@@ -49,4 +49,18 @@ router.delete(
   scriptController.deleteScript
 );
 
+router.post(
+  "/:id/parametros/:parametroId",
+  verifyJWT,
+  verifyRole("ADMIN"),
+  scriptController.assignParametro
+);
+
+router.delete(
+  "/:id/parametros/:parametroId",
+  verifyJWT,
+  verifyRole("ADMIN"),
+  scriptController.removeParametro
+);
+
 module.exports = router;

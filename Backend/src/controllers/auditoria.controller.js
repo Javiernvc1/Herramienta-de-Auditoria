@@ -109,10 +109,143 @@ async function deleteAuditoria(req, res) {
   }
 }
 
+// Asignar empresa a auditoría
+async function assignEmpresa(req, res) {
+  try {
+
+    const { id, empresaId } = req.params;
+
+    const [auditoria, error] =
+      await AuditoriaService.assignEmpresa(id, empresaId);
+
+    if (error) {
+      return respondError(req, res, 404, error);
+    }
+
+    respondSuccess(req, res, 200, auditoria);
+
+  } catch (error) {
+    handleError(error, "auditoria.controller -> assignEmpresa");
+    respondError(req, res, 500, "No se pudo asignar la empresa");
+  }
+}
+
+// Remover empresa de auditoría
+async function removeEmpresa(req, res) {
+  try {
+
+    const { id, empresaId } = req.params;
+
+    const [auditoria, error] =
+      await AuditoriaService.removeEmpresa(id, empresaId);
+
+    if (error) {
+      return respondError(req, res, 404, error);
+    }
+
+    respondSuccess(req, res, 200, auditoria);
+
+  } catch (error) {
+    handleError(error, "auditoria.controller -> removeEmpresa");
+    respondError(req, res, 500, "No se pudo remover la empresa");
+  }
+}
+
+// Asignar usuario a auditoría
+async function assignUser(req, res) {
+  try {
+
+    const { id, userId } = req.params;
+
+    const [auditoria, error] =
+      await AuditoriaService.assignUser(id, userId);
+
+    if (error) {
+      return respondError(req, res, 404, error);
+    }
+
+    respondSuccess(req, res, 200, auditoria);
+
+  } catch (error) {
+    handleError(error, "auditoria.controller -> assignUser");
+    respondError(req, res, 500, "No se pudo asignar el usuario");
+  }
+}
+
+// Remover usuario de auditoría
+async function removeUser(req, res) {
+  try {
+
+    const { id, userId } = req.params;
+
+    const [auditoria, error] =
+      await AuditoriaService.removeUser(id, userId);
+
+    if (error) {
+      return respondError(req, res, 404, error);
+    }
+
+    respondSuccess(req, res, 200, auditoria);
+
+  } catch (error) {
+    handleError(error, "auditoria.controller -> removeUser");
+    respondError(req, res, 500, "No se pudo remover el usuario");
+  }
+}
+
+// Asignar marco a auditoría
+async function assignMarco(req, res) {
+  try {
+
+    const { id, marcoId } = req.params;
+
+    const [auditoria, error] =
+      await AuditoriaService.assignMarco(id, marcoId);
+
+    if (error) {
+      return respondError(req, res, 404, error);
+    }
+
+    respondSuccess(req, res, 200, auditoria);
+
+  } catch (error) {
+    handleError(error, "auditoria.controller -> assignMarco");
+    respondError(req, res, 500, "No se pudo asignar el marco");
+  }
+}
+
+// Remover marco de auditoría
+async function removeMarco(req, res) {
+  try {
+
+    const { id, marcoId } = req.params;
+
+    const [auditoria, error] =
+      await AuditoriaService.removeMarco(id, marcoId);
+
+    if (error) {
+      return respondError(req, res, 404, error);
+    }
+
+    respondSuccess(req, res, 200, auditoria);
+
+  } catch (error) {
+    handleError(error, "auditoria.controller -> removeMarco");
+    respondError(req, res, 500, "No se pudo remover el marco");
+  }
+}
+
+
 module.exports = {
   getAuditorias,
   getAuditoriaById,
   createAuditoria,
   updateAuditoria,
   deleteAuditoria,
+  assignEmpresa,
+  removeEmpresa,
+  assignUser,
+  removeUser,
+  assignMarco,
+  removeMarco
 };

@@ -49,4 +49,14 @@ router.delete(
   equipoController.deleteEquipo
 );
 
+router.post(
+  "/:idEquipo/empresa/:idEmpresa",
+  equipoController.assignEmpresa
+);
+
+router.delete(
+  "/:idEquipo/empresa/:idEmpresa",
+  equipoController.removeEmpresa
+);
+
 module.exports = router;
