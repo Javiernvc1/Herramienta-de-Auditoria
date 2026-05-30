@@ -50,4 +50,35 @@ router.delete(
   resultadoControlController.deleteResultadoControl
 );
 
+// Asociar parámetro
+router.post(
+  "/:idResultadoControl/parametro/:idParametro",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  resultadoControlController.assignParametro
+);
+
+// Desasociar parámetro
+router.delete(
+  "/:idResultadoControl/parametro/:idParametro",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  resultadoControlController.removeParametro
+);
+
+// Asociar resultado
+router.post(
+  "/:idResultadoControl/resultado/:idResultado",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  resultadoControlController.assignResultado
+);
+
+// Desasociar resultado
+router.delete(
+  "/:idResultadoControl/resultado/:idResultado",
+  verifyJWT,
+  verifyRole("ADMIN", "AUDITOR"),
+  resultadoControlController.removeResultado
+);
 module.exports = router;

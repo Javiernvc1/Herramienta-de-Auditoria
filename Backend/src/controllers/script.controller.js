@@ -108,9 +108,9 @@ async function deleteScript(req, res) {
 
 async function assignParametro(req, res) {
   try {
-    const { scriptId, parametroId } = req.params;
+    const { id, parametroId } = req.params;
 
-    const [result, error] = await ScriptService.assignParametro(scriptId, parametroId);
+    const [result, error] = await ScriptService.assignParametro(id, parametroId);
 
     if (error) {
       return respondError(req, res, 400, error);
@@ -126,9 +126,9 @@ async function assignParametro(req, res) {
 
 async function removeParametro(req, res) {
   try {
-    const { scriptId, parametroId } = req.params;
+    const { id, parametroId } = req.params;
 
-    const [result, error] = await ScriptService.removeParametro(scriptId, parametroId);
+    const [result, error] = await ScriptService.removeParametro(id, parametroId);
 
     if (error) {
       return respondError(req, res, 400, error);

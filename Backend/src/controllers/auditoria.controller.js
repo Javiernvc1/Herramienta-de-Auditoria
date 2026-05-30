@@ -114,7 +114,8 @@ async function assignEmpresa(req, res) {
   try {
 
     const { id, empresaId } = req.params;
-
+    console.log("ID auditoría:", id);
+    console.log("ID empresa:", empresaId);
     const [auditoria, error] =
       await AuditoriaService.assignEmpresa(id, empresaId);
 
@@ -158,7 +159,7 @@ async function assignUser(req, res) {
     const { id, userId } = req.params;
 
     const [auditoria, error] =
-      await AuditoriaService.assignUser(id, userId);
+      await AuditoriaService.assignUsuario(id, userId);
 
     if (error) {
       return respondError(req, res, 404, error);
@@ -179,7 +180,7 @@ async function removeUser(req, res) {
     const { id, userId } = req.params;
 
     const [auditoria, error] =
-      await AuditoriaService.removeUser(id, userId);
+      await AuditoriaService.removeUsuario(id, userId);
 
     if (error) {
       return respondError(req, res, 404, error);

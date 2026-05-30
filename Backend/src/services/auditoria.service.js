@@ -152,9 +152,9 @@ async function assignEmpresa(auditoriaId, empresaId) {
     if (!auditoria) {
       return [null, "La auditoría no existe"];
     }
-
+    console.log(empresaId);
     const empresa = await Empresa.findByPk(empresaId);
-
+    console.log("Empresa encontrada:", empresa);
     if (!empresa) {
       return [null, "La empresa no existe"];
     }

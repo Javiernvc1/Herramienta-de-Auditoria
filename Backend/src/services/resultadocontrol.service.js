@@ -1,8 +1,8 @@
 "use strict";
 
-const ResultadoControl = require("../models/resultadocontrol.model");
+const ResultadoControl = require("../models/resultadoControl.model");
 const Resultado = require("../models/resultado.model");
-const Control = require("../models/control.model");
+const Parametro = require("../models/parametro.model");
 
 const { handleError } = require("../utils/errorHandler");
 
@@ -11,24 +11,32 @@ const { handleError } = require("../utils/errorHandler");
  */
 async function getResultadosControl() {
   try {
-    const resultados = await ResultadoControl.findAll({
+
+    const resultadosControl = await ResultadoControl.findAll({
       include: [
         {
           model: Resultado,
-          attributes: ["id_resultado", "estado"]
+          through: { attributes: [] },
+          attributes: ["id_resultado", "fecha_ejecucion"]
         },
         {
-          model: Control,
-          attributes: ["id_control", "nombre"]
+          model: Parametro,
+          through: { attributes: [] },
+          attributes: [
+            "id_parametro",
+            "nombre",
+            "valor_esperado"
+          ]
         }
       ]
     });
 
-    if (!resultados || resultados.length === 0) {
+    if (!resultadosControl || resultadosControl.length === 0) {
       return [null, "No hay resultados de control registrados"];
     }
 
-    return [resultados, null];
+    return [resultadosControl, null];
+
   } catch (error) {
     handleError(error, "resultadoControl.service -> getResultadosControl");
   }
@@ -39,24 +47,32 @@ async function getResultadosControl() {
  */
 async function getResultadoControlById(id) {
   try {
-    const resultado = await ResultadoControl.findByPk(id, {
+
+    const resultadoControl = await ResultadoControl.findByPk(id, {
       include: [
         {
           model: Resultado,
-          attributes: ["id_resultado", "estado"]
+          through: { attributes: [] },
+          attributes: ["id_resultado", "fecha_ejecucion"]
         },
         {
-          model: Control,
-          attributes: ["id_control", "nombre"]
+          model: Parametro,
+          through: { attributes: [] },
+          attributes: [
+            "id_parametro",
+            "nombre",
+            "valor_esperado"
+          ]
         }
       ]
     });
 
-    if (!resultado) {
+    if (!resultadoControl) {
       return [null, "El resultado de control no existe"];
     }
 
-    return [resultado, null];
+    return [resultadoControl, null];
+
   } catch (error) {
     handleError(error, "resultadoControl.service -> getResultadoControlById");
   }
@@ -67,35 +83,45 @@ async function getResultadoControlById(id) {
  */
 async function createResultadoControl(data) {
   try {
+
     const {
+      valor_obtenido,
       estado,
-      observacion,
-      evidencia,
-      id_resultado,
-      id_control
+      resultados,
+      parametros
     } = data;
 
-    const resultadoFound = await Resultado.findByPk(id_resultado);
-
-    if (!resultadoFound) {
-      return [null, "El resultado no existe"];
-    }
-
-    const controlFound = await Control.findByPk(id_control);
-
-    if (!controlFound) {
-      return [null, "El control no existe"];
-    }
-
     const newResultadoControl = await ResultadoControl.create({
-      estado,
-      observacion,
-      evidencia,
-      id_resultado,
-      id_control
+      valor_obtenido,
+      estado
     });
 
+    // RESULTADOS
+    if (resultados && resultados.length > 0) {
+
+      const resultadosFound = await Resultado.findAll({
+        where: {
+          id_resultado: resultados
+        }
+      });
+
+      await newResultadoControl.setResultados(resultadosFound);
+    }
+
+    // PARAMETROS
+    if (parametros && parametros.length > 0) {
+
+      const parametrosFound = await Parametro.findAll({
+        where: {
+          id_parametro: parametros
+        }
+      });
+
+      await newResultadoControl.setParametros(parametrosFound);
+    }
+
     return [newResultadoControl, null];
+
   } catch (error) {
     handleError(error, "resultadoControl.service -> createResultadoControl");
   }
@@ -106,12 +132,12 @@ async function createResultadoControl(data) {
  */
 async function updateResultadoControl(id, data) {
   try {
+
     const {
+      valor_obtenido,
       estado,
-      observacion,
-      evidencia,
-      id_resultado,
-      id_control
+      resultados,
+      parametros
     } = data;
 
     const resultadoControl = await ResultadoControl.findByPk(id);
@@ -121,14 +147,36 @@ async function updateResultadoControl(id, data) {
     }
 
     await resultadoControl.update({
-      estado,
-      observacion,
-      evidencia,
-      id_resultado,
-      id_control
+      valor_obtenido,
+      estado
     });
 
+    // RESULTADOS
+    if (resultados) {
+
+      const resultadosFound = await Resultado.findAll({
+        where: {
+          id_resultado: resultados
+        }
+      });
+
+      await resultadoControl.setResultados(resultadosFound);
+    }
+
+    // PARAMETROS
+    if (parametros) {
+
+      const parametrosFound = await Parametro.findAll({
+        where: {
+          id_parametro: parametros
+        }
+      });
+
+      await resultadoControl.setParametros(parametrosFound);
+    }
+
     return [resultadoControl, null];
+
   } catch (error) {
     handleError(error, "resultadoControl.service -> updateResultadoControl");
   }
@@ -139,6 +187,7 @@ async function updateResultadoControl(id, data) {
  */
 async function deleteResultadoControl(id) {
   try {
+
     const resultadoControl = await ResultadoControl.findByPk(id);
 
     if (!resultadoControl) {
@@ -148,8 +197,121 @@ async function deleteResultadoControl(id) {
     await resultadoControl.destroy();
 
     return [resultadoControl, null];
+
   } catch (error) {
     handleError(error, "resultadoControl.service -> deleteResultadoControl");
+  }
+}
+
+/**
+ * Asociar parámetro
+ */
+async function assignParametro(resultadoControlId, parametroId) {
+  try {
+
+    const resultadoControl =
+      await ResultadoControl.findByPk(resultadoControlId);
+
+    if (!resultadoControl) {
+      return [null, "El resultado de control no existe"];
+    }
+
+    const parametro = await Parametro.findByPk(parametroId);
+
+    if (!parametro) {
+      return [null, "El parámetro no existe"];
+    }
+
+    await resultadoControl.addParametro(parametro);
+
+    return [resultadoControl, null];
+
+  } catch (error) {
+    handleError(error, "resultadoControl.service -> assignParametro");
+  }
+}
+
+/**
+ * Desasociar parámetro
+ */
+async function removeParametro(resultadoControlId, parametroId) {
+  try {
+
+    const resultadoControl =
+      await ResultadoControl.findByPk(resultadoControlId);
+
+    if (!resultadoControl) {
+      return [null, "El resultado de control no existe"];
+    }
+
+    const parametro = await Parametro.findByPk(parametroId);
+
+    if (!parametro) {
+      return [null, "El parámetro no existe"];
+    }
+
+    await resultadoControl.removeParametro(parametro);
+
+    return [resultadoControl, null];
+
+  } catch (error) {
+    handleError(error, "resultadoControl.service -> removeParametro");
+  }
+}
+
+/**
+ * Asociar resultado
+ */
+async function assignResultado(resultadoControlId, resultadoId) {
+  try {
+
+    const resultadoControl =
+      await ResultadoControl.findByPk(resultadoControlId);
+
+    if (!resultadoControl) {
+      return [null, "El resultado de control no existe"];
+    }
+
+    const resultado = await Resultado.findByPk(resultadoId);
+
+    if (!resultado) {
+      return [null, "El resultado no existe"];
+    }
+
+    await resultadoControl.addResultado(resultado);
+
+    return [resultadoControl, null];
+
+  } catch (error) {
+    handleError(error, "resultadoControl.service -> assignResultado");
+  }
+}
+
+/**
+ * Desasociar resultado
+ */
+async function removeResultado(resultadoControlId, resultadoId) {
+  try {
+
+    const resultadoControl =
+      await ResultadoControl.findByPk(resultadoControlId);
+
+    if (!resultadoControl) {
+      return [null, "El resultado de control no existe"];
+    }
+
+    const resultado = await Resultado.findByPk(resultadoId);
+
+    if (!resultado) {
+      return [null, "El resultado no existe"];
+    }
+
+    await resultadoControl.removeResultado(resultado);
+
+    return [resultadoControl, null];
+
+  } catch (error) {
+    handleError(error, "resultadoControl.service -> removeResultado");
   }
 }
 
@@ -159,4 +321,8 @@ module.exports = {
   createResultadoControl,
   updateResultadoControl,
   deleteResultadoControl,
+  assignParametro,
+  removeParametro,
+  assignResultado,
+  removeResultado
 };

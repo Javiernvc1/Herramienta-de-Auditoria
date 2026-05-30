@@ -50,28 +50,28 @@ router.delete(
 );
 
 router.post(
-  "/:id/empresa/:idEmpresa",
+  "/:id/empresa/:empresaId",
   verifyJWT,
   verifyRole("ADMIN", "AUDITOR"),
   auditoriaController.assignEmpresa
 );
 
 router.delete(
-  "/:id/empresa/:idEmpresa",
+  "/:id/empresa/:empresaId",
   verifyJWT,
   verifyRole("ADMIN", "AUDITOR"),
   auditoriaController.removeEmpresa
 );
 
 router.post(
-  "/:id/usuario/:idUsuario",
+  "/:id/usuario/:userId",
   verifyJWT,
   verifyRole("ADMIN", "AUDITOR"),
   auditoriaController.assignUser
 );
 
 router.delete(
-  "/:id/usuario/:idUsuario",
+  "/:id/usuario/:userId",
   verifyJWT,
   verifyRole("ADMIN", "AUDITOR"),
   auditoriaController.removeUser

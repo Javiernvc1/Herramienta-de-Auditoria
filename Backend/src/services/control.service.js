@@ -2,7 +2,7 @@
 
 const Control = require("../models/control.model");
 const Marco = require("../models/marco.model");
-
+const Parametro = require("../models/parametro.model");
 const { handleError } = require("../utils/errorHandler");
 
 /**
@@ -13,9 +13,9 @@ async function getControles() {
     const controles = await Control.findAll({
       include: {
         model: Marco,
-        through: { attributes: [] },
+        through: { attributes: []  },
         attributes: ["id_marco", "nombre"]
-      }
+      },
     });
 
     if (!controles || controles.length === 0) {

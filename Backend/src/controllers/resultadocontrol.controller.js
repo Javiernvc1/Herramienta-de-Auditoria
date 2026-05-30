@@ -8,6 +8,7 @@ const { handleError } = require("../utils/errorHandler");
 // Obtener todos los resultados de control
 async function getResultadosControl(req, res) {
   try {
+
     const [resultados, errorResultados] =
       await ResultadoControlService.getResultadosControl();
 
@@ -28,6 +29,7 @@ async function getResultadosControl(req, res) {
 // Obtener resultado de control por ID
 async function getResultadoControlById(req, res) {
   try {
+
     const { id } = req.params;
 
     const [resultado, errorResultado] =
@@ -48,6 +50,7 @@ async function getResultadoControlById(req, res) {
 // Crear resultado de control
 async function createResultadoControl(req, res) {
   try {
+
     const { body } = req;
 
     const [newResultado, errorResultado] =
@@ -55,10 +58,6 @@ async function createResultadoControl(req, res) {
 
     if (errorResultado) {
       return respondError(req, res, 400, errorResultado);
-    }
-
-    if (!newResultado) {
-      return respondError(req, res, 400, "No se creó el resultado");
     }
 
     respondSuccess(req, res, 201, newResultado);
@@ -72,6 +71,7 @@ async function createResultadoControl(req, res) {
 // Actualizar resultado de control
 async function updateResultadoControl(req, res) {
   try {
+
     const { id } = req.params;
     const { body } = req;
 
@@ -93,6 +93,7 @@ async function updateResultadoControl(req, res) {
 // Eliminar resultado de control
 async function deleteResultadoControl(req, res) {
   try {
+
     const { id } = req.params;
 
     const [resultado, errorResultado] =
@@ -102,11 +103,112 @@ async function deleteResultadoControl(req, res) {
       return respondError(req, res, 404, errorResultado);
     }
 
-    respondSuccess(req, res, 200, "Resultado de control eliminado exitosamente");
+    respondSuccess(
+      req,
+      res,
+      200,
+      "Resultado de control eliminado exitosamente"
+    );
 
   } catch (error) {
     handleError(error, "resultadoControl.controller -> deleteResultadoControl");
     respondError(req, res, 500, "No se pudo eliminar el resultado");
+  }
+}
+
+// Asociar parámetro
+async function assignParametro(req, res) {
+  try {
+
+    const { idResultadoControl, idParametro } = req.params;
+
+    const [resultado, errorResultado] =
+      await ResultadoControlService.assignParametro(
+        idResultadoControl,
+        idParametro
+      );
+
+    if (errorResultado) {
+      return respondError(req, res, 400, errorResultado);
+    }
+
+    respondSuccess(req, res, 200, resultado);
+
+  } catch (error) {
+    handleError(error, "resultadoControl.controller -> assignParametro");
+    respondError(req, res, 500, "No se pudo asociar el parámetro");
+  }
+}
+
+// Desasociar parámetro
+async function removeParametro(req, res) {
+  try {
+
+    const { idResultadoControl, idParametro } = req.params;
+
+    const [resultado, errorResultado] =
+      await ResultadoControlService.removeParametro(
+        idResultadoControl,
+        idParametro
+      );
+
+    if (errorResultado) {
+      return respondError(req, res, 400, errorResultado);
+    }
+
+    respondSuccess(req, res, 200, resultado);
+
+  } catch (error) {
+    handleError(error, "resultadoControl.controller -> removeParametro");
+    respondError(req, res, 500, "No se pudo desasociar el parámetro");
+  }
+}
+
+// Asociar resultado
+async function assignResultado(req, res) {
+  try {
+
+    const { idResultadoControl, idResultado } = req.params;
+
+    const [resultado, errorResultado] =
+      await ResultadoControlService.assignResultado(
+        idResultadoControl,
+        idResultado
+      );
+
+    if (errorResultado) {
+      return respondError(req, res, 400, errorResultado);
+    }
+
+    respondSuccess(req, res, 200, resultado);
+
+  } catch (error) {
+    handleError(error, "resultadoControl.controller -> assignResultado");
+    respondError(req, res, 500, "No se pudo asociar el resultado");
+  }
+}
+
+// Desasociar resultado
+async function removeResultado(req, res) {
+  try {
+
+    const { idResultadoControl, idResultado } = req.params;
+
+    const [resultado, errorResultado] =
+      await ResultadoControlService.removeResultado(
+        idResultadoControl,
+        idResultado
+      );
+
+    if (errorResultado) {
+      return respondError(req, res, 400, errorResultado);
+    }
+
+    respondSuccess(req, res, 200, resultado);
+
+  } catch (error) {
+    handleError(error, "resultadoControl.controller -> removeResultado");
+    respondError(req, res, 500, "No se pudo desasociar el resultado");
   }
 }
 
@@ -116,4 +218,8 @@ module.exports = {
   createResultadoControl,
   updateResultadoControl,
   deleteResultadoControl,
+  assignParametro,
+  removeParametro,
+  assignResultado,
+  removeResultado
 };

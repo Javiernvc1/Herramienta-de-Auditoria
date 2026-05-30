@@ -107,9 +107,9 @@ async function deleteParametro(req, res) {
 
 async function assignControl(req, res) {
   try {
-    const { id, id_control } = req.params;
+    const { id, controlId } = req.params;
 
-    const [parametro, errorParametro] = await ParametroService.assignControl(id, id_control);
+    const [parametro, errorParametro] = await ParametroService.assignControl(id, controlId);
 
     if (errorParametro) {
       return respondError(req, res, 400, errorParametro);
@@ -125,9 +125,9 @@ async function assignControl(req, res) {
 
 async function removeControl(req, res) {
   try {
-    const { id, id_control } = req.params;
+    const { id, controlId } = req.params;
 
-    const [parametro, errorParametro] = await ParametroService.removeControl(id, id_control);
+    const [parametro, errorParametro] = await ParametroService.removeControl(id, controlId);
 
     if (errorParametro) {
       return respondError(req, res, 400, errorParametro);

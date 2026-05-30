@@ -1,186 +1,262 @@
 "use strict";
 
-const { exec } = require("child_process");
-const util = require("util");
-
-const execPromise = util.promisify(exec);
-
 const Auditoria = require("../models/auditoria.model");
+const Empresa = require("../models/empresa.model");
+const Equipo = require("../models/equipo.model");
+const Marco = require("../models/marco.model");
 const Control = require("../models/control.model");
 const Parametro = require("../models/parametro.model");
 const Script = require("../models/script.model");
+const Resultado = require("../models/resultado.model");
 const ResultadoControl = require("../models/resultadoControl.model");
+
+const ExecutorService = require("./executor.service");
 
 const { handleError } = require("../utils/errorHandler");
 
 /**
  * Ejecuta una auditoría completa
- * @param {number} id_auditoria
  */
 async function ejecutarAuditoria(id_auditoria) {
+
   try {
 
-    // =========================
-    // Buscar auditoría
-    // =========================
-    const auditoria = await Auditoria.findByPk(id_auditoria);
+    const auditoria = await Auditoria.findByPk(
+      id_auditoria,
+      {
+        include: [
+          {
+            model: Empresa,
+            through: { attributes: [] },
+            include: [
+              {
+                model: Equipo,
+                through: { attributes: [] }
+              }
+            ]
+          },
+          {
+            model: Marco,
+            through: { attributes: [] },
+            include: [
+              {
+                model: Control,
+                through: { attributes: [] },
+                include: [
+                  {
+                    model: Parametro,
+                    through: { attributes: [] },
+                    include: [
+                      {
+                        model: Script,
+                        through: { attributes: [] }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    );
 
     if (!auditoria) {
       return [null, "La auditoría no existe"];
     }
 
-    // =========================
-    // Obtener controles
-    // =========================
-    const controles = await Control.findAll({
-      include: [
-        {
-          model: Parametro,
-          include: [Script]
-        }
-      ]
-    });
+    // ==========================
+    // Crear resultado principal
+    // ==========================
 
-    if (!controles || controles.length === 0) {
-      return [null, "No existen controles"];
+    const resultadoAuditoria =
+      await Resultado.create({
+        fecha_ejecucion: new Date()
+      });
+
+    await auditoria.addResultado(
+      resultadoAuditoria
+    );
+
+    // ==========================
+    // Asociar equipos
+    // ==========================
+
+    const equipos = [];
+
+    for (const empresa of auditoria.Empresas || []) {
+
+      if (
+        empresa.Equipos &&
+        empresa.Equipos.length > 0
+      ) {
+
+        equipos.push(
+          ...empresa.Equipos
+        );
+      }
     }
 
-    // =========================
-    // Resultado final
-    // =========================
+    if (equipos.length > 0) {
+
+      await resultadoAuditoria.addEquipos(
+        equipos
+      );
+    }
+
+    // ==========================
+    // Ejecutar auditoría
+    // ==========================
+
     const resultados = [];
 
-    // =========================
-    // Recorrer controles
-    // =========================
-    for (const control of controles) {
+    for (const marco of auditoria.Marcos || []) {
 
-      if (!control.Parametros || control.Parametros.length === 0) {
-        continue;
-      }
+      for (const control of marco.Controls || []) {
 
-      // =========================
-      // Recorrer parámetros
-      // =========================
-      for (const parametro of control.Parametros) {
+        for (const parametro of control.Parametros || []) {
 
-        // =========================
-        // Obtener script asociado
-        // =========================
-        const script = parametro.Script;
-
-        if (!script) {
-          continue;
-        }
-
-        try {
-
-          // =========================
-          // Construir comando
-          // =========================
-          const comandoCompleto =
-            `${script.comando} "${script.ruta}"`;
-
-          console.log("Ejecutando:", comandoCompleto);
-
-          // =========================
-          // Ejecutar script
-          // =========================
-          const { stdout, stderr } =
-            await execPromise(comandoCompleto);
-
-          if (stderr) {
-            console.log(stderr);
+          if (
+            !parametro.Scripts ||
+            parametro.Scripts.length === 0
+          ) {
             continue;
           }
 
-          // =========================
-          // Convertir resultado JSON
-          // =========================
-          const resultadoScript = JSON.parse(stdout);
+          for (const script of parametro.Scripts) {
 
-          // =========================
-          // Comparar resultado
-          // =========================
-          let cumple = false;
+            try {
 
-          if (
-            parametro.valor_esperado === "NINGUNO"
-          ) {
-            cumple =
-              !resultadoScript.valor_obtenido ||
-              resultadoScript.valor_obtenido.trim() === "";
+              const [
+                resultadoScript,
+                errorScript
+              ] =
+                await ExecutorService.executeScript(
+                  script.id_script
+                );
+
+              if (errorScript) {
+
+                resultados.push({
+                  marco: marco.nombre,
+                  control: control.nombre,
+                  parametro: parametro.nombre,
+                  error: errorScript
+                });
+
+                continue;
+              }
+
+              let estado = "NO CUMPLE";
+
+              if (
+                parametro.valor_esperado &&
+                parametro.valor_esperado.toUpperCase() ===
+                "INFORMATIVO"
+              ) {
+
+                estado = "INFORMATIVO";
+
+              } else if (
+                parametro.valor_esperado &&
+                resultadoScript.valor_obtenido
+              ) {
+
+                estado =
+                  resultadoScript.valor_obtenido
+                    .trim()
+                    .toLowerCase() ===
+                  parametro.valor_esperado
+                    .trim()
+                    .toLowerCase()
+                    ? "CUMPLE"
+                    : "NO CUMPLE";
+              }
+
+              // ==========================
+              // Crear ResultadoControl
+              // ==========================
+
+              const resultadoControl =
+                await ResultadoControl.create({
+
+                  valor_obtenido:
+                    resultadoScript.valor_obtenido,
+
+                  estado
+                });
+
+              await resultadoAuditoria.addResultadoControl(
+                resultadoControl
+              );
+
+              await parametro.addResultadoControl(
+                resultadoControl
+              );
+
+              resultados.push({
+
+                marco:
+                  marco.nombre,
+
+                control:
+                  control.nombre,
+
+                parametro:
+                  resultadoScript.parametro,
+
+                valor_obtenido:
+                  resultadoScript.valor_obtenido,
+
+                valor_esperado:
+                  parametro.valor_esperado,
+
+                estado
+              });
+
+            } catch (scriptError) {
+
+              console.error(scriptError);
+
+              resultados.push({
+
+                marco:
+                  marco.nombre,
+
+                control:
+                  control.nombre,
+
+                parametro:
+                  parametro.nombre,
+
+                error:
+                  scriptError.message
+              });
+            }
           }
-          else {
-            cumple =
-              resultadoScript.valor_obtenido ===
-              parametro.valor_esperado;
-          }
-
-          // =========================
-          // Guardar resultado en BD
-          // =========================
-          const nuevoResultado =
-            await ResultadoControl.create({
-
-              resultado:
-                resultadoScript.valor_obtenido,
-
-              cumple,
-
-              id_control:
-                control.id_control,
-
-              id_auditoria:
-                auditoria.id_auditoria
-            });
-
-          // =========================
-          // Agregar al arreglo final
-          // =========================
-          resultados.push({
-
-            control:
-              control.nombre,
-
-            parametro:
-              parametro.descripcion,
-
-            valor_obtenido:
-              resultadoScript.valor_obtenido,
-
-            valor_esperado:
-              parametro.valor_esperado,
-
-            cumple
-          });
-
-        } catch (scriptError) {
-
-          console.log(scriptError);
-
-          resultados.push({
-
-            control:
-              control.nombre,
-
-            parametro:
-              parametro.descripcion,
-
-            error:
-              "Error ejecutando script",
-
-            detalle:
-              scriptError.message
-          });
         }
       }
     }
 
-    // =========================
-    // Retornar resultados
-    // =========================
-    return [resultados, null];
+    return [
+      {
+        id_resultado:
+          resultadoAuditoria.id_resultado,
+
+        fecha_ejecucion:
+          resultadoAuditoria.fecha_ejecucion,
+
+        equipos:
+          equipos.map(e => ({
+            id_equipo: e.id_equipo,
+            hostname: e.hostname,
+            ip: e.ip
+          })),
+
+        resultados
+      },
+      null
+    ];
 
   } catch (error) {
 
@@ -188,6 +264,11 @@ async function ejecutarAuditoria(id_auditoria) {
       error,
       "auditExecutor.service -> ejecutarAuditoria"
     );
+
+    return [
+      null,
+      "Error ejecutando auditoría"
+    ];
   }
 }
 

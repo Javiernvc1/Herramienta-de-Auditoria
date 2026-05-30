@@ -1,6 +1,7 @@
 "use strict";
 
 const Marco = require("../models/marco.model");
+const Control = require("../models/control.model");
 
 const { handleError } = require("../utils/errorHandler");
 

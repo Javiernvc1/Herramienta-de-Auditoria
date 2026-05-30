@@ -19,6 +19,9 @@ const auditoriaRoutes = require("./auditoria.routes.js");
 const resultadoControlRoutes = require("./resultadoControl.routes.js");
 const executorRoutes = require("./executor.routes.js");
 const auditExecutorRoutes = require("./auditExecutor.routes");
+const resultadoRoutes = require("./resultado.routes.js");
+const reportRoutes = require("./report.routes.js");
+const reportPDFRoutes = require("./reportpdf.routes.js");
 /** Instancia del router */
 const router = express.Router();
 
@@ -70,5 +73,12 @@ router.use("/executor", authenticationMiddleware, executorRoutes);
 
 // Ejecutor de auditorías
 router.use("/audit-executor", authenticationMiddleware, auditExecutorRoutes);
+
+// Resultados
+router.use("/resultados", authenticationMiddleware, resultadoRoutes);
+
+router.use("/reportes", authenticationMiddleware, reportRoutes);
+
+router.use("/reportespdf", authenticationMiddleware, reportPDFRoutes);
 
 module.exports = router;
