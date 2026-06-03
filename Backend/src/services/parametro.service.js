@@ -62,11 +62,6 @@ async function createParametro(data) {
       valor_esperado,
     } = data;
 
-    const controlFound = await Control.findByPk(id_control);
-
-    if (!controlFound) {
-      return [null, "El control no existe"];
-    }
 
     const parametroFound = await Parametro.findOne({
       where: {

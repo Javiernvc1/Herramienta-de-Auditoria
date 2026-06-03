@@ -29,7 +29,7 @@ router.get(
 router.post(
   "/",
   verifyJWT,
-  verifyRole("ADMIN"),
+  verifyRole("ADMIN", "AUDITOR"),
   parametroController.createParametro
 );
 
