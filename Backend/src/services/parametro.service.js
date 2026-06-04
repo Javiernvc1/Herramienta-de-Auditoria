@@ -103,11 +103,6 @@ async function updateParametro(id, data) {
       return [null, "El parámetro no existe"];
     }
 
-    const controlFound = await Control.findByPk(id_control);
-
-    if (!controlFound) {
-      return [null, "El control no existe"];
-    }
 
     await parametro.update({
       nombre,

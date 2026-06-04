@@ -160,3 +160,73 @@ export async function removeMarco(
     throw error;
   }
 }
+
+/**
+ * Cambiar marco asociado
+ */
+export async function changeMarco(
+  controlId,
+  oldMarcoId,
+  newMarcoId
+) {
+
+  try {
+
+    if (
+      Number(oldMarcoId) ===
+      Number(newMarcoId)
+    ) {
+
+      return true;
+    }
+
+    await removeMarco(
+      controlId,
+      oldMarcoId
+    );
+
+    await assignMarco(
+      controlId,
+      newMarcoId
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.error(error);
+
+    throw error;
+  }
+}
+
+/**
+ * Crear control y asociarlo
+ * inmediatamente a un marco
+ */
+export async function createControlWithMarco(
+  nombre,
+  marcoId
+) {
+
+  try {
+
+    const control =
+      await createControl({
+        nombre
+      });
+
+    await assignMarco(
+      control.id_control,
+      marcoId
+    );
+
+    return control;
+
+  } catch (error) {
+
+    console.error(error);
+
+    throw error;
+  }
+}
