@@ -103,17 +103,33 @@ async function updateEmpresa(id, data) {
  */
 async function deleteEmpresa(id) {
   try {
-    const empresa = await Empresa.findByPk(id);
+
+    const empresa = await Empresa.findByPk(id, {
+      include: Equipo
+    });
 
     if (!empresa) {
       return [null, "La empresa no existe"];
     }
 
+    const equipos = empresa.Equipos || [];
+
+    for (const equipo of equipos) {
+
+      await equipo.destroy();
+
+    }
+
     await empresa.destroy();
 
     return [empresa, null];
+
   } catch (error) {
-    handleError(error, "empresa.service -> deleteEmpresa");
+
+    handleError(
+      error,
+      "empresa.service -> deleteEmpresa"
+    );
   }
 }
 

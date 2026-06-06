@@ -1,156 +1,156 @@
 import {
-  useEffect,
-  useState
+    useEffect,
+    useState
 } from "react";
 
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from "@mui/material";
 
 export default function ControlDialog({
-  open,
-  onClose,
-  onSave,
-  control,
-  marcos
+    open,
+    onClose,
+    onSave,
+    control,
+    marcos
 }) {
 
-  const [nombre, setNombre] =
-    useState("");
+    const [nombre, setNombre] =
+        useState("");
 
-  const [marcoId, setMarcoId] =
-    useState("");
+    const [marcoId, setMarcoId] =
+        useState("");
 
-  useEffect(() => {
+    useEffect(() => {
 
-    if (control) {
+        if (control) {
 
-      setNombre(
-        control.nombre || ""
-      );
+            setNombre(
+                control.nombre || ""
+            );
 
-      setMarcoId(
-        control.Marcos?.[0]
-          ?.id_marco || ""
-      );
+            setMarcoId(
+                control.Marcos?.[0]
+                    ?.id_marco || ""
+            );
 
-    } else {
+        } else {
 
-      setNombre("");
+            setNombre("");
 
-      setMarcoId("");
+            setMarcoId("");
+        }
+
+    }, [control, open]);
+
+    function handleSubmit() {
+
+        onSave({
+            nombre,
+            marcoId
+        });
     }
 
-  }, [control, open]);
+    return (
 
-  function handleSubmit() {
-
-    onSave({
-      nombre,
-      marcoId
-    });
-  }
-
-  return (
-
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-    >
-
-      <DialogTitle>
-
-        {control
-          ? "Editar Control"
-          : "Nuevo Control"}
-
-      </DialogTitle>
-
-      <DialogContent>
-
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Nombre"
-          value={nombre}
-          onChange={(e) =>
-            setNombre(
-              e.target.value
-            )
-          }
-        />
-
-        <FormControl
-          fullWidth
-          margin="normal"
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="sm"
         >
 
-          <InputLabel>
-            Marco
-          </InputLabel>
+            <DialogTitle>
 
-          <Select
-            value={marcoId}
-            label="Marco"
-            onChange={(e) =>
-              setMarcoId(
-                e.target.value
-              )
-            }
-          >
+                {control
+                    ? "Editar Control"
+                    : "Nuevo Control"}
 
-            {marcos.map(
-              (marco) => (
+            </DialogTitle>
 
-                <MenuItem
-                  key={
-                    marco.id_marco
-                  }
-                  value={
-                    marco.id_marco
-                  }
+            <DialogContent>
+
+                <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Nombre"
+                    value={nombre}
+                    onChange={(e) =>
+                        setNombre(
+                            e.target.value
+                        )
+                    }
+                />
+
+                <FormControl
+                    fullWidth
+                    margin="normal"
                 >
-                  {marco.nombre}
-                </MenuItem>
 
-              )
-            )}
+                    <InputLabel>
+                        Marco
+                    </InputLabel>
 
-          </Select>
+                    <Select
+                        value={marcoId}
+                        label="Marco"
+                        onChange={(e) =>
+                            setMarcoId(
+                                e.target.value
+                            )
+                        }
+                    >
 
-        </FormControl>
+                        {marcos.map(
+                            (marco) => (
 
-      </DialogContent>
+                                <MenuItem
+                                    key={
+                                        marco.id_marco
+                                    }
+                                    value={
+                                        marco.id_marco
+                                    }
+                                >
+                                    {marco.nombre}
+                                </MenuItem>
 
-      <DialogActions>
+                            )
+                        )}
 
-        <Button
-          onClick={onClose}
-        >
-          Cancelar
-        </Button>
+                    </Select>
 
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-        >
-          Guardar
-        </Button>
+                </FormControl>
 
-      </DialogActions>
+            </DialogContent>
 
-    </Dialog>
+            <DialogActions>
 
-  );
+                <Button
+                    onClick={onClose}
+                >
+                    Cancelar
+                </Button>
+
+                <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                >
+                    Guardar
+                </Button>
+
+            </DialogActions>
+
+        </Dialog>
+
+    );
 }

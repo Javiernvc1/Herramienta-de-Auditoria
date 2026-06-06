@@ -40,6 +40,7 @@ async function executeScript(id_script) {
       exec(
         fullCommand,
         {
+          encoding: "utf8",
           timeout: 30000,
           maxBuffer: 1024 * 1024
         },

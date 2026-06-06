@@ -9,6 +9,11 @@ const scriptController = require("../controllers/script.controller");
 const verifyJWT = require("../middlewares/authentication.middleware");
 const verifyRole = require("../middlewares/authorization.middleware");
 
+const upload =
+  require(
+    "../middlewares/upload.middleware"
+  );
+  
 // Obtener todos los scripts
 router.get(
   "/",
@@ -29,6 +34,7 @@ router.get(
 router.post(
   "/",
   verifyJWT,
+  upload.single("archivo"),
   verifyRole("ADMIN", "AUDITOR"),
   scriptController.createScript
 );
@@ -37,6 +43,7 @@ router.post(
 router.put(
   "/:id",
   verifyJWT,
+  upload.single("archivo"),
   verifyRole("ADMIN"),
   scriptController.updateScript
 );

@@ -55,11 +55,6 @@ export default function Sidebar() {
       text: "Usuarios",
       icon: <People />,
       path: "/usuarios"
-    },
-    {
-      text: "Reportes",
-      icon: <Summarize />,
-      path: "/reportes"
     }
   ];
 

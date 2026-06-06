@@ -1,3 +1,7 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+chcp 65001 > $null
+
 $parametro = "usuarios_locales"
 
 $usuarios = Get-LocalUser |

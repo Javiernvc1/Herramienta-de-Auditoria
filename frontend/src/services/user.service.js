@@ -83,7 +83,7 @@ export const getUsersByRole = async (
 export const createUser = async (
   userData
 ) => {
-
+  console.log("Creando usuario con datos:", userData);
   try {
 
     const response =

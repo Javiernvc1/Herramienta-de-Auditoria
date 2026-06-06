@@ -47,8 +47,9 @@ async function getScriptById(req, res) {
 async function createScript(req, res) {
   try {
     const { body } = req;
+     const file = req.file || null;
 
-    const [newScript, errorScript] = await ScriptService.createScript(body);
+    const [newScript, errorScript] = await ScriptService.createScript(body, file);
 
     if (errorScript) {
       return respondError(req, res, 400, errorScript);
@@ -71,8 +72,9 @@ async function updateScript(req, res) {
   try {
     const { id } = req.params;
     const { body } = req;
+    const file = req.file || null;
 
-    const [script, errorScript] = await ScriptService.updateScript(id, body);
+    const [script, errorScript] = await ScriptService.updateScript(id, body, file);
 
     if (errorScript) {
       return respondError(req, res, 400, errorScript);

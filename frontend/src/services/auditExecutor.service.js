@@ -5,7 +5,7 @@ export const ejecutarAuditoria = async (id) => {
   try {
 
     const response = await api.post(
-      `/auditexecutor/${id}`
+      `/audit-executor/${id}`
     );
 
     return response.data.data;

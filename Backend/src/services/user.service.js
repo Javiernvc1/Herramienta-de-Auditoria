@@ -34,7 +34,8 @@ async function createUser(user) {
     const userFound = await User.findOne({ where: { email } });
     if (userFound) return [null, "El usuario ya existe"];
 
-    const roleFound = await Role.findOne({ where: { name: roleId } });
+    const roleFound =
+  await Role.findByPk(roleId);
     if (!roleFound) return [null, "El rol no existe"];
 
     
@@ -45,8 +46,7 @@ async function createUser(user) {
       apellido,
       email,
       password_hash: encryptedPassword,
-      telefono,
-      roleId: roleFound.name
+      roleId: roleFound.id
     });
 
     return [newUser, null];
@@ -75,35 +75,96 @@ const comparePassword = async (inputPassword, storedPassword) => {
 };
 
 async function updateUser(id, user) {
+
   console.log(user);
+
   try {
-    const { nombre, apellido, email, password_hash, newPassword, telefono, roleId } = user;
 
-    const userFound = await User.findByPk(id);
-    if (!userFound) return [null, "El usuario no existe"];
-
-    // Aquí asumimos que tienes una función para comparar contraseñas
-    const matchPassword = await comparePassword(password_hash, userFound.password_hash);
-    if (!matchPassword) return [null, "La contraseña no coincide"];
-
-    const roleFound = await Role.findOne({ where: { name: roleId } });
-    if (!roleFound) return [null, "El rol no existe"];
-
-    // Aquí asumimos que tienes una función para encriptar contraseñas
-    const encryptedPassword = await hashPassword(newPassword || password_hash);
-
-    await userFound.update({
+    const {
       nombre,
       apellido,
       email,
-      password_hash: encryptedPassword,
-      telefono,
-      roleId: roleFound.name
-    });
+      password_hash,
+      newPassword,
+      roleId
+    } = user;
 
-    return [null, "Usuario actualizado exitosamente"];
+    const userFound =
+      await User.findByPk(id);
+
+    if (!userFound) {
+
+      return [
+        null,
+        "El usuario no existe"
+      ];
+    }
+
+    const matchPassword =
+      await comparePassword(
+        password_hash,
+        userFound.password_hash
+      );
+
+    if (!matchPassword) {
+
+      return [
+        null,
+        "La contraseña no coincide"
+      ];
+    }
+
+    const roleFound =
+      await Role.findByPk(roleId);
+
+    if (!roleFound) {
+
+      return [
+        null,
+        "El rol no existe"
+      ];
+    }
+
+    const updateData = {
+
+      nombre,
+
+      apellido,
+
+      email,
+
+      roleId: roleFound.id
+    };
+
+    // Solo actualizar contraseña
+    // si se ingresó una nueva
+
+    if (
+      newPassword &&
+      newPassword.trim() !== ""
+    ) {
+
+      updateData.password_hash =
+        await hashPassword(
+          newPassword
+        );
+    }
+
+    await userFound.update(
+      updateData
+    );
+
+    return [
+      userFound,
+      null
+    ];
+
   } catch (error) {
-    handleError(error, "user.service -> updateUser");
+
+    handleError(
+      error,
+      "user.service -> updateUser"
+    );
   }
 }
 

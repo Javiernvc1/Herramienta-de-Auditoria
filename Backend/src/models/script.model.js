@@ -16,6 +16,14 @@ const Script = sequelize.define("Script", {
   tipo: {
     type: DataTypes.STRING,
     allowNull: false
+
+  },
+  sistema_operativo: {
+    type: DataTypes.ENUM(
+      "windows",
+      "linux"
+    ),
+    allowNull: false
   },
 
   ruta: {
@@ -27,6 +35,7 @@ const Script = sequelize.define("Script", {
     type: DataTypes.TEXT,
     allowNull: false
   }
+
 }, {
   tableName: "scripts",
   timestamps: false

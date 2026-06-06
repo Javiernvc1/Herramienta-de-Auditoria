@@ -56,6 +56,10 @@ import Scripts
 import Reportes
   from "../pages/Reportes/Reportes";
 
+// Resultados
+import ResultadoDetalle
+  from "../pages/Resultados/ResultadoDetalle";
+
 export default function AppRouter() {
 
   return (
@@ -97,6 +101,27 @@ export default function AppRouter() {
           }
         />
 
+        <Route
+          path="/auditorias/crear"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <CrearAuditoria />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/auditorias/:id"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <DetalleAuditoria />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* EMPRESAS */}
 
@@ -150,19 +175,19 @@ export default function AppRouter() {
           }
         />
 
-        {/* REPORTES */}
+
+        {/* RESULTADOS */}
 
         <Route
-          path="/reportes"
+          path="/resultados/:id"
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <Reportes />
+                <ResultadoDetalle />
               </DashboardLayout>
             </ProtectedRoute>
           }
         />
-
       </Routes>
 
     </BrowserRouter>

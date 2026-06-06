@@ -5,18 +5,18 @@ import api from "./root.service";
 // ============================
 
 export const getResultadosControl = async () => {
-  const { data } = await api.get("/resultadoscontrol");
+  const { data } = await api.get("/resultados-control");
   return data.data;
 };
 
 export const getResultadoControlById = async (id) => {
-  const { data } = await api.get(`/resultadoscontrol/${id}`);
+  const { data } = await api.get(`/resultados-control/${id}`);
   return data.data;
 };
 
 export const createResultadoControl = async (resultadoControl) => {
   const { data } = await api.post(
-    "/resultadoscontrol",
+    "/resultados-control",
     resultadoControl
   );
 
@@ -28,7 +28,7 @@ export const updateResultadoControl = async (
   resultadoControl
 ) => {
   const { data } = await api.put(
-    `/resultadoscontrol/${id}`,
+    `/resultados-control/${id}`,
     resultadoControl
   );
 
@@ -37,7 +37,7 @@ export const updateResultadoControl = async (
 
 export const deleteResultadoControl = async (id) => {
   const { data } = await api.delete(
-    `/resultadoscontrol/${id}`
+    `/resultados-control/${id}`
   );
 
   return data.data;
@@ -52,7 +52,7 @@ export const assignParametro = async (
   idParametro
 ) => {
   const { data } = await api.post(
-    `/resultadoscontrol/${idResultadoControl}/parametro/${idParametro}`
+    `/resultados-control/${idResultadoControl}/parametro/${idParametro}`
   );
 
   return data.data;
@@ -63,7 +63,7 @@ export const removeParametro = async (
   idParametro
 ) => {
   const { data } = await api.delete(
-    `/resultadoscontrol/${idResultadoControl}/parametro/${idParametro}`
+    `/resultados-control/${idResultadoControl}/parametro/${idParametro}`
   );
 
   return data.data;
@@ -78,7 +78,7 @@ export const assignResultado = async (
   idResultado
 ) => {
   const { data } = await api.post(
-    `/resultadoscontrol/${idResultadoControl}/resultado/${idResultado}`
+    `/resultados-control/${idResultadoControl}/resultado/${idResultado}`
   );
 
   return data.data;
@@ -89,7 +89,7 @@ export const removeResultado = async (
   idResultado
 ) => {
   const { data } = await api.delete(
-    `/resultadoscontrol/${idResultadoControl}/resultado/${idResultado}`
+    `/resultados-control/${idResultadoControl}/resultado/${idResultado}`
   );
 
   return data.data;

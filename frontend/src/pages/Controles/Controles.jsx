@@ -97,6 +97,13 @@ export default function Controles() {
     setEditingControl] =
     useState(null);
 
+  const [scriptSO,
+    setScriptSO] =
+    useState("windows");
+
+  const [scriptFile,
+    setScriptFile] =
+    useState(null);
   const [snackbar,
     setSnackbar] =
     useState({
@@ -523,26 +530,26 @@ export default function Controles() {
 
   useEffect(() => {
 
-  if (
-    scriptTipo ===
-    "powershell"
-  ) {
+    if (
+      scriptTipo ===
+      "powershell"
+    ) {
 
-    setScriptComando(
-      "powershell.exe -ExecutionPolicy Bypass -File"
-    );
+      setScriptComando(
+        "powershell.exe -ExecutionPolicy Bypass -File"
+      );
 
-  } else if (
-    scriptTipo ===
-    "bash"
-  ) {
-
-    setScriptComando(
+    } else if (
+      scriptTipo ===
       "bash"
-    );
-  }
+    ) {
 
-}, [scriptTipo]);
+      setScriptComando(
+        "bash"
+      );
+    }
+
+  }, [scriptTipo]);
 
   function handleCreateScript() {
 
@@ -565,6 +572,10 @@ export default function Controles() {
     setScriptTipo(
       "powershell"
     );
+
+    setScriptSO("windows");
+
+    setScriptFile(null);
 
     setScriptRuta("");
 
@@ -602,6 +613,13 @@ export default function Controles() {
     setScriptDialogOpen(
       true
     );
+
+    setScriptSO(
+      script.sistema_operativo ||
+      "windows"
+    );
+
+    setScriptFile(null);
   }
 
   async function handleSaveScript() {
@@ -627,14 +645,24 @@ export default function Controles() {
         await updateScript(
           editingScript.id_script,
           {
+
             nombre:
               scriptNombre,
+
             tipo:
               scriptTipo,
-            ruta:
-              scriptRuta,
+
             comando:
-              scriptComando
+              scriptComando,
+
+            sistema_operativo:
+              scriptSO,
+
+            id_parametro:
+              selectedParametro.id_parametro,
+
+            archivo:
+              scriptFile
           }
         );
 
@@ -649,14 +677,24 @@ export default function Controles() {
 
         const script =
           await createScript({
+
             nombre:
               scriptNombre,
+
             tipo:
               scriptTipo,
-            ruta:
-              scriptRuta,
+
             comando:
-              scriptComando
+              scriptComando,
+
+            sistema_operativo:
+              scriptSO,
+
+            id_parametro:
+              selectedParametro.id_parametro,
+
+            archivo:
+              scriptFile
           });
 
         await assignParametro(
@@ -1136,7 +1174,11 @@ export default function Controles() {
                             primary={
                               script.nombre
                             }
-
+                            secondary={
+                              `${script.tipo} • ${script.sistema_operativo ||
+                              "windows"
+                              }`
+                            }
                           />
 
                         </ListItemButton>
@@ -1351,18 +1393,36 @@ export default function Controles() {
 
           </FormControl>
 
-          <TextField
+          <FormControl
             fullWidth
             margin="normal"
-            label="Ruta"
-            value={scriptRuta}
-            onChange={(e) =>
-              setScriptRuta(
-                e.target.value
-              )
-            }
-          />
+          >
 
+            <InputLabel>
+              Sistema Operativo
+            </InputLabel>
+
+            <Select
+              value={scriptSO}
+              label="Sistema Operativo"
+              onChange={(e) =>
+                setScriptSO(
+                  e.target.value
+                )
+              }
+            >
+
+              <MenuItem value="windows">
+                Windows
+              </MenuItem>
+
+              <MenuItem value="linux">
+                Linux
+              </MenuItem>
+
+            </Select>
+
+          </FormControl>
           <TextField
             fullWidth
             margin="normal"
@@ -1374,7 +1434,39 @@ export default function Controles() {
               )
             }
           />
+          <Box mt={2}>
 
+            <Button
+              variant="outlined"
+              component="label"
+            >
+
+              Seleccionar Script
+
+              <input
+                hidden
+                type="file"
+                onChange={(e) =>
+                  setScriptFile(
+                    e.target.files[0]
+                  )
+                }
+              />
+
+            </Button>
+
+            {scriptFile && (
+
+              <Typography
+                variant="body2"
+                sx={{ mt: 1 }}
+              >
+                {scriptFile.name}
+              </Typography>
+
+            )}
+
+          </Box>
         </DialogContent>
 
         <DialogActions>

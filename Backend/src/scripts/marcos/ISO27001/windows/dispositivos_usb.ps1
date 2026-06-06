@@ -1,3 +1,7 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+chcp 65001 > $null
+
 $parametro = "usb_conectados"
 
 $usb = Get-PnpDevice | Where-Object { $_.Class -eq "USB" -and $_.Status -eq "OK" } |

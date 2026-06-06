@@ -47,10 +47,35 @@ export async function createScript(data) {
 
   try {
 
+    const formData =
+      new FormData();
+
+    Object.keys(data).forEach(
+      (key) => {
+
+        if (
+          data[key] !== null &&
+          data[key] !== undefined
+        ) {
+
+          formData.append(
+            key,
+            data[key]
+          );
+        }
+      }
+    );
+
     const response =
       await axios.post(
         "/scripts",
-        data
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data"
+          }
+        }
       );
 
     return response.data.data;
@@ -73,10 +98,35 @@ export async function updateScript(
 
   try {
 
+    const formData =
+      new FormData();
+
+    Object.keys(data).forEach(
+      (key) => {
+
+        if (
+          data[key] !== null &&
+          data[key] !== undefined
+        ) {
+
+          formData.append(
+            key,
+            data[key]
+          );
+        }
+      }
+    );
+
     const response =
       await axios.put(
         `/scripts/${id}`,
-        data
+        formData,
+        {
+          headers: {
+            "Content-Type":
+              "multipart/form-data"
+          }
+        }
       );
 
     return response.data.data;

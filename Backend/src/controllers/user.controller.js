@@ -80,6 +80,8 @@ async function getUserById(req, res) {
 async function updateUser(req, res) {
   try {
     const { params, body } = req;
+    console.log('updateUser - params:', params);
+    console.log('updateUser - body:', body);
     const { error: paramsError } = userIdSchema.validate(params);
     if (paramsError) return respondError(req, res, 400, paramsError.message);
 
@@ -87,7 +89,8 @@ async function updateUser(req, res) {
     if (bodyError) return respondError(req, res, 400, bodyError.message);
 
     const [user, userError] = await UserService.updateUser(params.id, body);
-
+    console.log('updateUser - user:', user);
+    console.log('updateUser - userError:', userError);
     if (userError) return respondError(req, res, 400, userError);
 
     respondSuccess(req, res, 200, user);
