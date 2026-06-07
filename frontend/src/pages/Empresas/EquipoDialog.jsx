@@ -4,7 +4,10 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField
+  TextField,
+  MenuItem,
+  Divider,
+  Typography
 } from "@mui/material";
 
 export default function EquipoDialog({
@@ -20,8 +23,23 @@ export default function EquipoDialog({
   setHostname,
 
   ip,
-  setIp
+  setIp,
+
+  tipoConexion,
+  setTipoConexion,
+
+  sshUsuario,
+  setSshUsuario,
+
+  sshPassword,
+  setSshPassword,
+
+  sshPuerto,
+  setSshPuerto
 }) {
+
+  const requiereSSH =
+    tipoConexion === "SSH";
 
   return (
 
@@ -79,13 +97,89 @@ export default function EquipoDialog({
           }
         />
 
+        <TextField
+          select
+          fullWidth
+          margin="normal"
+          label="Tipo de conexión"
+          value={tipoConexion}
+          onChange={(e) =>
+            setTipoConexion(
+              e.target.value
+            )
+          }
+        >
+
+          <MenuItem value="LOCAL">
+            LOCAL
+          </MenuItem>
+
+          <MenuItem value="SSH">
+            SSH
+          </MenuItem>
+
+        </TextField>
+
+        {requiereSSH && (
+
+          <>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+            >
+              Credenciales SSH
+            </Typography>
+
+            <TextField
+              fullWidth
+              margin="normal"
+              label="Usuario SSH"
+              value={sshUsuario}
+              onChange={(e) =>
+                setSshUsuario(
+                  e.target.value
+                )
+              }
+            />
+
+            <TextField
+              fullWidth
+              margin="normal"
+              type="password"
+              label="Contraseña SSH"
+              value={sshPassword}
+              onChange={(e) =>
+                setSshPassword(
+                  e.target.value
+                )
+              }
+            />
+
+            <TextField
+              fullWidth
+              margin="normal"
+              type="number"
+              label="Puerto SSH"
+              value={sshPuerto}
+              onChange={(e) =>
+                setSshPuerto(
+                  e.target.value
+                )
+              }
+            />
+
+          </>
+
+        )}
+
       </DialogContent>
 
       <DialogActions>
 
-        <Button
-          onClick={onClose}
-        >
+        <Button onClick={onClose}>
           Cancelar
         </Button>
 
@@ -95,7 +189,16 @@ export default function EquipoDialog({
           disabled={
             !nombreOS?.trim() ||
             !hostname?.trim() ||
-            !ip?.trim()
+            !ip?.trim() ||
+            !tipoConexion ||
+            (
+              requiereSSH &&
+              (
+                !sshUsuario?.trim() ||
+                !sshPassword?.trim() ||
+                !String(sshPuerto)?.trim()
+              )
+            )
           }
         >
           Guardar
@@ -104,6 +207,5 @@ export default function EquipoDialog({
       </DialogActions>
 
     </Dialog>
-
   );
 }

@@ -148,3 +148,13 @@ ResultadoControl.belongsToMany(Parametro, {
   through: "se_evalua",
   foreignKey: "id_resultado_control"
 });
+
+Equipo.belongsToMany(ResultadoControl, {
+  through: "evalua_equipo",
+  foreignKey: "id_equipo"
+});
+
+ResultadoControl.belongsToMany(Equipo, {
+  through: "evalua_equipo",
+  foreignKey: "id_resultado_control"
+});

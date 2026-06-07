@@ -113,6 +113,7 @@ export default function DetalleAuditoria() {
       <Stack
         direction="row"
         justifyContent="space-between"
+        spacing={4}
         mb={3}
       >
         <Typography variant="h4">
@@ -129,8 +130,9 @@ export default function DetalleAuditoria() {
         >
           Volver
         </Button>
-      </Stack>
 
+      </Stack>
+      <br /><br />
       <Paper sx={{ p: 3, mb: 3 }}>
 
         <Typography

@@ -283,6 +283,7 @@ export default function Usuarios() {
           fontWeight={700}
         >
           Gestión de Usuarios
+          <br /><br />
         </Typography>
 
         <Button
@@ -293,15 +294,15 @@ export default function Usuarios() {
         >
           Nuevo Usuario
         </Button>
-
+        <br /><br />
       </Box>
 
-      <Card>
+      <Card >
 
         <CardContent>
 
           <Typography
-            variant="h6"
+            variant="h5"
             fontWeight={600}
           >
             Usuarios

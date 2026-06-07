@@ -11,15 +11,18 @@ const Resultado = require("../models/resultado.model");
 const ResultadoControl = require("../models/resultadoControl.model");
 
 const ExecutorService = require("./executor.service");
+const SSHExecutorService = require("./sshExecutor.service");
 
 const { handleError } = require("../utils/errorHandler");
 
 /**
- * Ejecuta una auditoría completa
- */
+
+* Ejecuta una auditoría completa
+  */
 async function ejecutarAuditoria(id_auditoria) {
 
   try {
+
 
     const auditoria = await Auditoria.findByPk(
       id_auditoria,
@@ -65,9 +68,9 @@ async function ejecutarAuditoria(id_auditoria) {
       return [null, "La auditoría no existe"];
     }
 
-    // ==========================
+    // ==========================================
     // Crear resultado principal
-    // ==========================
+    // ==========================================
 
     const resultadoAuditoria =
       await Resultado.create({
@@ -78,9 +81,9 @@ async function ejecutarAuditoria(id_auditoria) {
       resultadoAuditoria
     );
 
-    // ==========================
-    // Asociar equipos
-    // ==========================
+    // ==========================================
+    // Obtener equipos asociados
+    // ==========================================
 
     const equipos = [];
 
@@ -104,134 +107,218 @@ async function ejecutarAuditoria(id_auditoria) {
       );
     }
 
-    // ==========================
+    // ==========================================
     // Ejecutar auditoría
-    // ==========================
+    // ==========================================
 
     const resultados = [];
 
-    for (const marco of auditoria.Marcos || []) {
+    for (const equipo of equipos) {
 
-      for (const control of marco.Controls || []) {
+      console.log(
+        `\n=====================================`
+      );
 
-        for (const parametro of control.Parametros || []) {
+      console.log(
+        `Auditando equipo: ${equipo.hostname}`
+      );
 
-          if (
-            !parametro.Scripts ||
-            parametro.Scripts.length === 0
-          ) {
-            continue;
-          }
+      console.log(
+        `Tipo conexión: ${equipo.tipo_conexion}`
+      );
 
-          for (const script of parametro.Scripts) {
+      console.log(
+        `=====================================\n`
+      );
 
-            try {
+      for (const marco of auditoria.Marcos || []) {
 
-              const [
-                resultadoScript,
-                errorScript
-              ] =
-                await ExecutorService.executeScript(
-                  script.id_script
+        for (const control of marco.Controls || []) {
+
+          for (const parametro of control.Parametros || []) {
+
+            if (
+              !parametro.Scripts ||
+              parametro.Scripts.length === 0
+            ) {
+              continue;
+            }
+
+            for (const script of parametro.Scripts) {
+
+              try {
+
+                let resultadoScript;
+                let errorScript;
+
+                // ==========================================
+                // LOCAL
+                // ==========================================
+
+                if (
+                  equipo.tipo_conexion === "LOCAL"
+                ) {
+
+                  [
+                    resultadoScript,
+                    errorScript
+                  ] =
+                    await ExecutorService.executeScript(
+                      script.id_script
+                    );
+
+                }
+
+                // ==========================================
+                // SSH
+                // ==========================================
+
+                else if (
+                  equipo.tipo_conexion === "SSH"
+                ) {
+
+                  [
+                    resultadoScript,
+                    errorScript
+                  ] =
+                    await SSHExecutorService.executeScript(
+                      script,
+                      equipo
+                    );
+                }
+
+                // ==========================================
+                // Error de ejecución
+                // ==========================================
+
+                if (errorScript) {
+
+                  resultados.push({
+
+                    equipo:
+                      equipo.hostname,
+
+                    marco:
+                      marco.nombre,
+
+                    control:
+                      control.nombre,
+
+                    parametro:
+                      parametro.nombre,
+
+                    error:
+                      errorScript
+                  });
+
+                  continue;
+                }
+
+                // ==========================================
+                // Evaluar resultado
+                // ==========================================
+
+                let estado = "NO CUMPLE";
+
+                if (
+                  parametro.valor_esperado &&
+                  parametro.valor_esperado
+                    .toUpperCase() ===
+                  "INFORMATIVO"
+                ) {
+
+                  estado = "INFORMATIVO";
+
+                } else if (
+                  parametro.valor_esperado &&
+                  resultadoScript.valor_obtenido
+                ) {
+
+                  estado =
+                    resultadoScript.valor_obtenido
+                      .trim()
+                      .toLowerCase() ===
+                      parametro.valor_esperado
+                        .trim()
+                        .toLowerCase()
+                      ? "CUMPLE"
+                      : "NO CUMPLE";
+                }
+
+                // ==========================================
+                // Guardar ResultadoControl
+                // ==========================================
+
+                const resultadoControl =
+                  await ResultadoControl.create({
+
+                    valor_obtenido:
+                      resultadoScript.valor_obtenido,
+
+                    estado
+                  });
+
+                await resultadoAuditoria.addResultadoControl(
+                  resultadoControl
                 );
 
-              if (errorScript) {
+                await parametro.addResultadoControl(
+                  resultadoControl
+                );
 
+                await equipo.addResultadoControl(
+                  resultadoControl
+                );
                 resultados.push({
-                  marco: marco.nombre,
-                  control: control.nombre,
-                  parametro: parametro.nombre,
-                  error: errorScript
-                });
 
-                continue;
-              }
+                  equipo:
+                    equipo.hostname,
 
-              let estado = "NO CUMPLE";
+                  ip:
+                    equipo.ip,
 
-              if (
-                parametro.valor_esperado &&
-                parametro.valor_esperado.toUpperCase() ===
-                "INFORMATIVO"
-              ) {
+                  marco:
+                    marco.nombre,
 
-                estado = "INFORMATIVO";
+                  control:
+                    control.nombre,
 
-              } else if (
-                parametro.valor_esperado &&
-                resultadoScript.valor_obtenido
-              ) {
-
-                estado =
-                  resultadoScript.valor_obtenido
-                    .trim()
-                    .toLowerCase() ===
-                  parametro.valor_esperado
-                    .trim()
-                    .toLowerCase()
-                    ? "CUMPLE"
-                    : "NO CUMPLE";
-              }
-
-              // ==========================
-              // Crear ResultadoControl
-              // ==========================
-
-              const resultadoControl =
-                await ResultadoControl.create({
+                  parametro:
+                    resultadoScript.parametro,
 
                   valor_obtenido:
                     resultadoScript.valor_obtenido,
 
+                  valor_esperado:
+                    parametro.valor_esperado,
+
                   estado
                 });
 
-              await resultadoAuditoria.addResultadoControl(
-                resultadoControl
-              );
+              } catch (scriptError) {
 
-              await parametro.addResultadoControl(
-                resultadoControl
-              );
+                console.error(
+                  scriptError
+                );
 
-              resultados.push({
+                resultados.push({
 
-                marco:
-                  marco.nombre,
+                  equipo:
+                    equipo.hostname,
 
-                control:
-                  control.nombre,
+                  marco:
+                    marco.nombre,
 
-                parametro:
-                  resultadoScript.parametro,
+                  control:
+                    control.nombre,
 
-                valor_obtenido:
-                  resultadoScript.valor_obtenido,
+                  parametro:
+                    parametro.nombre,
 
-                valor_esperado:
-                  parametro.valor_esperado,
-
-                estado
-              });
-
-            } catch (scriptError) {
-
-              console.error(scriptError);
-
-              resultados.push({
-
-                marco:
-                  marco.nombre,
-
-                control:
-                  control.nombre,
-
-                parametro:
-                  parametro.nombre,
-
-                error:
-                  scriptError.message
-              });
+                  error:
+                    scriptError.message
+                });
+              }
             }
           }
         }
@@ -239,6 +326,7 @@ async function ejecutarAuditoria(id_auditoria) {
     }
 
     return [
+
       {
         id_resultado:
           resultadoAuditoria.id_resultado,
@@ -248,17 +336,29 @@ async function ejecutarAuditoria(id_auditoria) {
 
         equipos:
           equipos.map(e => ({
-            id_equipo: e.id_equipo,
-            hostname: e.hostname,
-            ip: e.ip
+
+            id_equipo:
+              e.id_equipo,
+
+            hostname:
+              e.hostname,
+
+            ip:
+              e.ip,
+
+            tipo_conexion:
+              e.tipo_conexion
           })),
 
         resultados
       },
+
       null
     ];
 
+
   } catch (error) {
+
 
     handleError(
       error,
@@ -269,6 +369,8 @@ async function ejecutarAuditoria(id_auditoria) {
       null,
       "Error ejecutando auditoría"
     ];
+
+
   }
 }
 

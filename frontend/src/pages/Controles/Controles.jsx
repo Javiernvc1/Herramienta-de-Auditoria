@@ -26,7 +26,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Stack
 } from "@mui/material";
 
 import {
@@ -789,7 +790,7 @@ export default function Controles() {
       {/* CABECERA */}
 
       <Box mb={4}>
-
+        <Stack spacing={2}>
         <Typography
           variant="h4"
           fontWeight={700}
@@ -805,32 +806,34 @@ export default function Controles() {
           parámetros y scripts
           asociados a cada marco.
         </Typography>
-
+        </Stack>
+        <br /><br />
       </Box>
 
       {/* RESUMEN */}
 
       <Box
         display="flex"
-        gap={2}
+        gap={3}
         mb={3}
+        
       >
-
+        
         <Chip
           label={`${controles.length} Controles`}
-          color="primary"
+          color="primary" 
         />
-
+        
         <Chip
           label={`${parametros.length} Parámetros`}
-          color="secondary"
+          color="secondary" 
         />
 
         <Chip
           label={`${scripts.length} Scripts`}
           color="success"
         />
-
+        <br /><br />
       </Box>
 
       <Grid

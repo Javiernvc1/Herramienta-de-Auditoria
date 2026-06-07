@@ -241,7 +241,7 @@ export default function Marcos() {
       >
 
         <Box>
-
+          <Stack spacing={2}>
           <Typography
             variant="h4"
             fontWeight={700}
@@ -255,7 +255,8 @@ export default function Marcos() {
           >
             Administra los marcos normativos disponibles en el sistema.
           </Typography>
-
+          </Stack>
+          <br /><br />
         </Box>
 
         <Button
@@ -266,7 +267,7 @@ export default function Marcos() {
         >
           Nuevo Marco
         </Button>
-
+        <br /><br />
       </Box>
 
       {/* MÉTRICAS */}
@@ -294,13 +295,13 @@ export default function Marcos() {
             >
               {marcos.length}
             </Typography>
-
+            
           </CardContent>
 
         </Card>
 
       </Box>
-
+          <br />
       {/* TABLA */}
 
       <Card

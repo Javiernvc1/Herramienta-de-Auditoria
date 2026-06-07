@@ -162,7 +162,11 @@ export default function Auditorias() {
   return (
 
     <Box p={3}>
+      <Typography variant="h4">
 
+        Auditorías
+        <br /><br />
+      </Typography>
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -170,11 +174,7 @@ export default function Auditorias() {
         mb={3}
       >
 
-        <Typography variant="h4">
 
-          Auditorías
-
-        </Typography>
 
         <Stack
           direction="row"
@@ -208,7 +208,7 @@ export default function Auditorias() {
         </Stack>
 
       </Stack>
-
+      <br /><br />
       <Paper>
 
         <TableContainer>

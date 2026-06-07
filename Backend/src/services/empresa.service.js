@@ -13,7 +13,7 @@ async function getEmpresas() {
       include: {
         model: Equipo,
         through: { attributes: [] },
-        attributes: ["id_equipo", "nombreOS", "hostname", "ip"]
+        attributes: ["id_equipo", "nombreOS", "hostname", "ip", "tipo_conexion", "ssh_usuario", "ssh_password", "ssh_puerto"]
       }
     });
 
@@ -36,7 +36,7 @@ async function getEmpresaById(id) {
       include: {
         model: Equipo,
         through: { attributes: [] },
-        attributes: ["id_equipo", "nombreOS", "hostname", "ip"]
+        attributes: ["id_equipo", "nombreOS", "hostname", "ip", "tipo_conexion", "ssh_usuario", "ssh_password", "ssh_puerto"]
       }
     });
 

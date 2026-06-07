@@ -3,6 +3,7 @@
 const ResultadoControl = require("../models/resultadoControl.model");
 const Resultado = require("../models/resultado.model");
 const Parametro = require("../models/parametro.model");
+const Equipo = require("../models/equipo.model");
 
 const { handleError } = require("../utils/errorHandler");
 
@@ -11,7 +12,6 @@ const { handleError } = require("../utils/errorHandler");
  */
 async function getResultadosControl() {
   try {
-
     const resultadosControl = await ResultadoControl.findAll({
       include: [
         {
@@ -26,6 +26,17 @@ async function getResultadosControl() {
             "id_parametro",
             "nombre",
             "valor_esperado"
+          ]
+        },
+        {
+          model: Equipo,
+          through: { attributes: [] },
+          attributes: [
+            "id_equipo",
+            "nombreOS",
+            "hostname",
+            "ip",
+            "tipo_conexion"
           ]
         }
       ]
@@ -47,7 +58,6 @@ async function getResultadosControl() {
  */
 async function getResultadoControlById(id) {
   try {
-
     const resultadoControl = await ResultadoControl.findByPk(id, {
       include: [
         {
@@ -62,6 +72,17 @@ async function getResultadoControlById(id) {
             "id_parametro",
             "nombre",
             "valor_esperado"
+          ]
+        },
+        {
+          model: Equipo,
+          through: { attributes: [] },
+          attributes: [
+            "id_equipo",
+            "nombreOS",
+            "hostname",
+            "ip",
+            "tipo_conexion"
           ]
         }
       ]
@@ -83,12 +104,12 @@ async function getResultadoControlById(id) {
  */
 async function createResultadoControl(data) {
   try {
-
     const {
       valor_obtenido,
       estado,
       resultados,
-      parametros
+      parametros,
+      equipos
     } = data;
 
     const newResultadoControl = await ResultadoControl.create({
@@ -96,9 +117,7 @@ async function createResultadoControl(data) {
       estado
     });
 
-    // RESULTADOS
     if (resultados && resultados.length > 0) {
-
       const resultadosFound = await Resultado.findAll({
         where: {
           id_resultado: resultados
@@ -108,9 +127,7 @@ async function createResultadoControl(data) {
       await newResultadoControl.setResultados(resultadosFound);
     }
 
-    // PARAMETROS
     if (parametros && parametros.length > 0) {
-
       const parametrosFound = await Parametro.findAll({
         where: {
           id_parametro: parametros
@@ -118,6 +135,16 @@ async function createResultadoControl(data) {
       });
 
       await newResultadoControl.setParametros(parametrosFound);
+    }
+
+    if (equipos && equipos.length > 0) {
+      const equiposFound = await Equipo.findAll({
+        where: {
+          id_equipo: equipos
+        }
+      });
+
+      await newResultadoControl.setEquipos(equiposFound);
     }
 
     return [newResultadoControl, null];
@@ -132,12 +159,12 @@ async function createResultadoControl(data) {
  */
 async function updateResultadoControl(id, data) {
   try {
-
     const {
       valor_obtenido,
       estado,
       resultados,
-      parametros
+      parametros,
+      equipos
     } = data;
 
     const resultadoControl = await ResultadoControl.findByPk(id);
@@ -151,9 +178,7 @@ async function updateResultadoControl(id, data) {
       estado
     });
 
-    // RESULTADOS
     if (resultados) {
-
       const resultadosFound = await Resultado.findAll({
         where: {
           id_resultado: resultados
@@ -163,9 +188,7 @@ async function updateResultadoControl(id, data) {
       await resultadoControl.setResultados(resultadosFound);
     }
 
-    // PARAMETROS
     if (parametros) {
-
       const parametrosFound = await Parametro.findAll({
         where: {
           id_parametro: parametros
@@ -173,6 +196,16 @@ async function updateResultadoControl(id, data) {
       });
 
       await resultadoControl.setParametros(parametrosFound);
+    }
+
+    if (equipos) {
+      const equiposFound = await Equipo.findAll({
+        where: {
+          id_equipo: equipos
+        }
+      });
+
+      await resultadoControl.setEquipos(equiposFound);
     }
 
     return [resultadoControl, null];
@@ -187,7 +220,6 @@ async function updateResultadoControl(id, data) {
  */
 async function deleteResultadoControl(id) {
   try {
-
     const resultadoControl = await ResultadoControl.findByPk(id);
 
     if (!resultadoControl) {
@@ -208,7 +240,6 @@ async function deleteResultadoControl(id) {
  */
 async function assignParametro(resultadoControlId, parametroId) {
   try {
-
     const resultadoControl =
       await ResultadoControl.findByPk(resultadoControlId);
 
@@ -236,7 +267,6 @@ async function assignParametro(resultadoControlId, parametroId) {
  */
 async function removeParametro(resultadoControlId, parametroId) {
   try {
-
     const resultadoControl =
       await ResultadoControl.findByPk(resultadoControlId);
 
@@ -264,7 +294,6 @@ async function removeParametro(resultadoControlId, parametroId) {
  */
 async function assignResultado(resultadoControlId, resultadoId) {
   try {
-
     const resultadoControl =
       await ResultadoControl.findByPk(resultadoControlId);
 
@@ -292,7 +321,6 @@ async function assignResultado(resultadoControlId, resultadoId) {
  */
 async function removeResultado(resultadoControlId, resultadoId) {
   try {
-
     const resultadoControl =
       await ResultadoControl.findByPk(resultadoControlId);
 
@@ -315,6 +343,60 @@ async function removeResultado(resultadoControlId, resultadoId) {
   }
 }
 
+/**
+ * Asociar equipo
+ */
+async function assignEquipo(resultadoControlId, equipoId) {
+  try {
+    const resultadoControl =
+      await ResultadoControl.findByPk(resultadoControlId);
+
+    if (!resultadoControl) {
+      return [null, "El resultado de control no existe"];
+    }
+
+    const equipo = await Equipo.findByPk(equipoId);
+
+    if (!equipo) {
+      return [null, "El equipo no existe"];
+    }
+
+    await resultadoControl.addEquipo(equipo);
+
+    return [resultadoControl, null];
+
+  } catch (error) {
+    handleError(error, "resultadoControl.service -> assignEquipo");
+  }
+}
+
+/**
+ * Desasociar equipo
+ */
+async function removeEquipo(resultadoControlId, equipoId) {
+  try {
+    const resultadoControl =
+      await ResultadoControl.findByPk(resultadoControlId);
+
+    if (!resultadoControl) {
+      return [null, "El resultado de control no existe"];
+    }
+
+    const equipo = await Equipo.findByPk(equipoId);
+
+    if (!equipo) {
+      return [null, "El equipo no existe"];
+    }
+
+    await resultadoControl.removeEquipo(equipo);
+
+    return [resultadoControl, null];
+
+  } catch (error) {
+    handleError(error, "resultadoControl.service -> removeEquipo");
+  }
+}
+
 module.exports = {
   getResultadosControl,
   getResultadoControlById,
@@ -324,5 +406,7 @@ module.exports = {
   assignParametro,
   removeParametro,
   assignResultado,
-  removeResultado
+  removeResultado,
+  assignEquipo,
+  removeEquipo
 };

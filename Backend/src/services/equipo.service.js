@@ -64,7 +64,11 @@ async function createEquipo(data) {
     const {
       nombreOS,
       hostname,
-      ip
+      ip,
+      tipo_conexion,
+      ssh_usuario,
+      ssh_password,
+      ssh_puerto
     } = data;
 
     const equipoFound = await Equipo.findOne({
@@ -78,7 +82,11 @@ async function createEquipo(data) {
     const newEquipo = await Equipo.create({
       nombreOS,
       hostname,
-      ip
+      ip,
+      tipo_conexion,
+      ssh_usuario,
+      ssh_password,
+      ssh_puerto
     });
 
     return [newEquipo, null];
@@ -97,7 +105,11 @@ async function updateEquipo(id, data) {
     const {
       nombreOS,
       hostname,
-      ip
+      ip,
+      tipo_conexion,
+      ssh_usuario,
+      ssh_password,
+      ssh_puerto
     } = data;
 
     const equipo = await Equipo.findByPk(id);
@@ -109,7 +121,11 @@ async function updateEquipo(id, data) {
     await equipo.update({
       nombreOS,
       hostname,
-      ip
+      ip,
+      tipo_conexion,
+      ssh_usuario,
+      ssh_password,
+      ssh_puerto
     });
 
     return [equipo, null];

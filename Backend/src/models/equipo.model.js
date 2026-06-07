@@ -17,11 +17,29 @@ const Equipo = sequelize.define("Equipo", {
     allowNull: false
   },
 
+  tipo_conexion: {
+    type: DataTypes.ENUM("LOCAL", "SSH"),
+    allowNull: false,
+    defaultValue: "LOCAL"
+  },
   ip: {
     type: DataTypes.STRING,
     allowNull: false
-  }
-}, {
+  },
+  ssh_usuario: {
+  type: DataTypes.STRING,
+  allowNull: false
+},
+ssh_password: {
+  type: DataTypes.STRING,
+  allowNull: false
+},
+ssh_puerto: {
+  type: DataTypes.INTEGER,
+  allowNull: false
+}
+},  
+{
   tableName: "equipos",
   timestamps: false
 });
