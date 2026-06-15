@@ -4,7 +4,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar
+  Toolbar,
+  Box
 } from "@mui/material";
 
 import {
@@ -18,6 +19,8 @@ import {
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
+
+import logo from "../assets/logo-sisinf.png";
 
 const drawerWidth = 240;
 
@@ -67,12 +70,24 @@ export default function Sidebar() {
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           width: drawerWidth,
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          backgroundColor: "rgb(184, 178, 164)",
+          backdropFilter: "blur(10px)",
+          borderRight: "1px solid rgba(0, 0, 0, 0.08)"
         }
       }}
     >
 
       <Toolbar />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mb: 2
+        }}
+      >
+        <img src={logo} alt="Logo" style={{ width: "100px" }} />
+      </Box>
 
       <List>
 

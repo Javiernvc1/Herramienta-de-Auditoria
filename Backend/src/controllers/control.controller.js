@@ -1,7 +1,7 @@
 "use strict";
 
 const ControlService = require("../services/control.service");
-
+const { controlBodySchema, controlIdSchema } = require("../schema/control.schema");
 const { respondSuccess, respondError } = require("../utils/resHandler");
 const { handleError } = require("../utils/errorHandler");
 
@@ -28,7 +28,8 @@ async function getControles(req, res) {
 async function getControlById(req, res) {
   try {
     const { id } = req.params;
-
+    const { error: paramsError } = controlIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
     const [control, errorControl] = await ControlService.getControlById(id);
 
     if (errorControl) {
@@ -47,6 +48,8 @@ async function getControlById(req, res) {
 async function createControl(req, res) {
   try {
     const { body } = req;
+    const { error: bodyError } = controlBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
 
     const [newControl, errorControl] = await ControlService.createControl(body);
 
@@ -71,7 +74,10 @@ async function updateControl(req, res) {
   try {
     const { id } = req.params;
     const { body } = req;
-
+    const { error: paramsError } = controlIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
+    const { error: bodyError } = controlBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
     const [control, errorControl] = await ControlService.updateControl(id, body);
 
     if (errorControl) {

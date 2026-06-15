@@ -68,103 +68,111 @@ async function createScript(data, file) {
       id_parametro
     } = data;
 
+    if (!file) {
+      return [
+        null,
+        "Debe subir un archivo .ps1 o .sh"
+      ];
+    }
+
     const scriptFound =
       await Script.findOne({
         where: { nombre }
       });
 
     if (scriptFound) {
-
       return [
         null,
         "El script ya existe"
       ];
     }
 
-    let rutaFinal = "";
-
-    if (file && id_parametro) {
-
-      const parametro =
-        await Parametro.findByPk(
-          id_parametro,
-          {
-            include: [
-              {
-                model: Control,
-                include: [Marco]
-              }
-            ]
-          }
-        );
-
-      if (!parametro) {
-
-        return [
-          null,
-          "Parámetro no encontrado"
-        ];
-      }
-
-      const control =
-        parametro.Controls?.[0];
-
-      const marco =
-        control?.Marcos?.[0];
-
-      if (!marco) {
-
-        return [
-          null,
-          "No se encontró el marco asociado"
-        ];
-      }
-
-      const nombreMarco =
-        marco.nombre
-          .replace(/\s+/g, "");
-
-      const carpetaDestino =
-        path.join(
-          process.cwd(),
-          "src",
-          "scripts",
-          "marcos",
-          nombreMarco,
-          sistema_operativo
-        );
-
-      fs.mkdirSync(
-        carpetaDestino,
-        { recursive: true }
+    const parametro =
+      await Parametro.findByPk(
+        id_parametro,
+        {
+          include: [
+            {
+              model: Control,
+              through: { attributes: [] },
+              include: [
+                {
+                  model: Marco,
+                  through: { attributes: [] }
+                }
+              ]
+            }
+          ]
+        }
       );
 
-      const extension =
-        path.extname(
-          file.originalname
-        );
-
-      const nombreArchivo =
-        file.originalname;
-
-      const rutaDestino =
-        path.join(
-          carpetaDestino,
-          nombreArchivo
-        );
-
-      fs.renameSync(
-        file.path,
-        rutaDestino
-      );
-
-      rutaFinal =
-        path.relative(
-          process.cwd(),
-          rutaDestino
-        )
-        .replaceAll("\\", "/");
+    if (!parametro) {
+      return [
+        null,
+        "Parámetro no encontrado"
+      ];
     }
+
+    const control =
+      parametro.Controls?.[0];
+
+    const marco =
+      control?.Marcos?.[0];
+
+    if (!control) {
+      return [
+        null,
+        "No se encontró el control asociado al parámetro"
+      ];
+    }
+
+    if (!marco) {
+      return [
+        null,
+        "No se encontró el marco asociado al control"
+      ];
+    }
+
+    const nombreMarco =
+      marco.nombre
+        .replace(/\s+/g, "")
+        .toLowerCase();
+
+    const carpetaDestino =
+      path.join(
+        process.cwd(),
+        "src",
+        "scripts",
+        "marcos",
+        nombreMarco,
+        sistema_operativo
+      );
+
+    fs.mkdirSync(
+      carpetaDestino,
+      { recursive: true }
+    );
+
+    const nombreArchivo =
+      file.originalname;
+
+    const rutaDestino =
+      path.join(
+        carpetaDestino,
+        nombreArchivo
+      );
+
+    fs.renameSync(
+      file.path,
+      rutaDestino
+    );
+
+    const rutaFinal =
+      path.relative(
+        process.cwd(),
+        rutaDestino
+      )
+        .replaceAll("\\", "/");
 
     const newScript =
       await Script.create({
@@ -177,22 +185,14 @@ async function createScript(data, file) {
 
         sistema_operativo,
 
-        ruta: rutaFinal
+        ruta:
+          rutaFinal
       });
-    if (id_parametro) {
-
-  const parametro =
-    await Parametro.findByPk(
-      id_parametro
-    );
-
-  if (parametro) {
 
     await newScript.addParametro(
       parametro
     );
-  }
-}
+
     return [
       newScript,
       null
@@ -204,6 +204,11 @@ async function createScript(data, file) {
       error,
       "script.service -> createScript"
     );
+
+    return [
+      null,
+      "Error creando script"
+    ];
   }
 }
 
@@ -227,13 +232,13 @@ async function updateScript(id, data, file) {
         id,
         {
           include: {
-            model: Parametro
+            model: Parametro,
+            through: { attributes: [] }
           }
         }
       );
 
     if (!script) {
-
       return [
         null,
         "El script no existe"
@@ -243,40 +248,56 @@ async function updateScript(id, data, file) {
     let rutaFinal =
       script.ruta;
 
-    /*
-    Si viene archivo nuevo
-    */
-    if (file && id_parametro) {
+    let parametro = null;
 
-      const parametro =
+    if (id_parametro) {
+
+      parametro =
         await Parametro.findByPk(
           id_parametro,
           {
             include: [
               {
                 model: Control,
-                include: [Marco]
+                through: { attributes: [] },
+                include: [
+                  {
+                    model: Marco,
+                    through: { attributes: [] }
+                  }
+                ]
               }
             ]
           }
         );
 
       if (!parametro) {
-
         return [
           null,
           "Parámetro no encontrado"
         ];
       }
+    }
+
+    /*
+    Si viene archivo nuevo
+    */
+    if (file) {
 
       const control =
-        parametro.Controls?.[0];
+        parametro?.Controls?.[0];
 
       const marco =
         control?.Marcos?.[0];
 
-      if (!marco) {
+      if (!control) {
+        return [
+          null,
+          "No se encontró el control asociado al parámetro"
+        ];
+      }
 
+      if (!marco) {
         return [
           null,
           "Marco no encontrado"
@@ -284,10 +305,9 @@ async function updateScript(id, data, file) {
       }
 
       const nombreMarco =
-        marco.nombre.replace(
-          /\s+/g,
-          ""
-        );
+        marco.nombre
+          .replace(/\s+/g, "")
+          .toLowerCase();
 
       const carpetaDestino =
         path.join(
@@ -301,9 +321,7 @@ async function updateScript(id, data, file) {
 
       fs.mkdirSync(
         carpetaDestino,
-        {
-          recursive: true
-        }
+        { recursive: true }
       );
 
       const rutaDestino =
@@ -312,9 +330,6 @@ async function updateScript(id, data, file) {
           file.originalname
         );
 
-      /*
-      Borra archivo anterior
-      */
       if (
         script.ruta &&
         fs.existsSync(
@@ -343,10 +358,7 @@ async function updateScript(id, data, file) {
           process.cwd(),
           rutaDestino
         )
-        .replaceAll(
-          "\\",
-          "/"
-        );
+          .replaceAll("\\", "/");
     }
 
     await script.update({
@@ -359,14 +371,11 @@ async function updateScript(id, data, file) {
 
       sistema_operativo,
 
-      ruta: rutaFinal
+      ruta:
+        rutaFinal
     });
 
-    /*
-    Actualizar relación parámetro-script
-    */
     if (id_parametro) {
-
       await script.setParametros([
         id_parametro
       ]);
@@ -383,6 +392,11 @@ async function updateScript(id, data, file) {
       error,
       "script.service -> updateScript"
     );
+
+    return [
+      null,
+      "Error actualizando script"
+    ];
   }
 }
 

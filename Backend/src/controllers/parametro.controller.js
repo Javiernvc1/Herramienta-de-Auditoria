@@ -4,7 +4,7 @@ const ParametroService = require("../services/parametro.service");
 
 const { respondSuccess, respondError } = require("../utils/resHandler");
 const { handleError } = require("../utils/errorHandler");
-
+const { parametroBodySchema, parametroIdSchema } = require("../schema/parametro.schema");
 // Obtener todos los parámetros
 async function getParametros(req, res) {
   try {
@@ -28,7 +28,8 @@ async function getParametros(req, res) {
 async function getParametroById(req, res) {
   try {
     const { id } = req.params;
-
+    const { error: paramsError } = parametroIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
     const [parametro, errorParametro] = await ParametroService.getParametroById(id);
 
     if (errorParametro) {
@@ -47,7 +48,8 @@ async function getParametroById(req, res) {
 async function createParametro(req, res) {
   try {
     const { body } = req;
-
+    const { error: bodyError } = parametroBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
     const [newParametro, errorParametro] = await ParametroService.createParametro(body);
 
     if (errorParametro) {
@@ -71,6 +73,10 @@ async function updateParametro(req, res) {
   try {
     const { id } = req.params;
     const { body } = req;
+    const { error: paramsError } = parametroIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
+    const { error: bodyError } = parametroBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
 
     const [parametro, errorParametro] = await ParametroService.updateParametro(id, body);
 

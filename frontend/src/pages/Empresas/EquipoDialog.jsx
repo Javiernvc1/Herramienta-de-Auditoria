@@ -61,7 +61,7 @@ export default function EquipoDialog({
       <DialogContent>
 
         <TextField
-          autoFocus
+          select
           fullWidth
           margin="normal"
           label="Sistema Operativo"
@@ -71,12 +71,22 @@ export default function EquipoDialog({
               e.target.value
             )
           }
-        />
+        >
+          <MenuItem value="windows">
+            Windows
+          </MenuItem>
+
+          <MenuItem value="linux">
+            Linux
+          </MenuItem>
+
+        </TextField>
 
         <TextField
           fullWidth
           margin="normal"
           label="Hostname"
+          placeholder="ej: equipo1"
           value={hostname}
           onChange={(e) =>
             setHostname(
@@ -89,6 +99,7 @@ export default function EquipoDialog({
           fullWidth
           margin="normal"
           label="IP"
+          placeholder="ej: 1.1.1.1"
           value={ip}
           onChange={(e) =>
             setIp(

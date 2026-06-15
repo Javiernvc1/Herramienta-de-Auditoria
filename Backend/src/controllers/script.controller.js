@@ -4,6 +4,7 @@ const ScriptService = require("../services/script.service");
 
 const { respondSuccess, respondError } = require("../utils/resHandler");
 const { handleError } = require("../utils/errorHandler");
+const { scriptBodySchema, scriptIdSchema } = require("../schema/script.schema");
 
 // Obtener todos los scripts
 async function getScripts(req, res) {
@@ -28,6 +29,8 @@ async function getScripts(req, res) {
 async function getScriptById(req, res) {
   try {
     const { id } = req.params;
+    const { error: paramsError } = scriptIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
 
     const [script, errorScript] = await ScriptService.getScriptById(id);
 
@@ -48,9 +51,12 @@ async function createScript(req, res) {
   try {
     const { body } = req;
      const file = req.file || null;
+    console.log("body", body);
+    const { error: bodyError, value } = scriptBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
 
-    const [newScript, errorScript] = await ScriptService.createScript(body, file);
-
+    const [newScript, errorScript] = await ScriptService.createScript(value, file);
+    
     if (errorScript) {
       return respondError(req, res, 400, errorScript);
     }
@@ -73,7 +79,11 @@ async function updateScript(req, res) {
     const { id } = req.params;
     const { body } = req;
     const file = req.file || null;
-
+    const { error: paramsError } = scriptIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
+    console.log("errorScript", paramsError);
+    const { error: bodyError } = scriptBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
     const [script, errorScript] = await ScriptService.updateScript(id, body, file);
 
     if (errorScript) {

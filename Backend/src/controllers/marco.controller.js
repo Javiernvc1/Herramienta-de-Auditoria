@@ -1,7 +1,7 @@
 "use strict";
 
 const MarcoService = require("../services/marco.service");
-
+const { marcoBodySchema, marcoIdSchema } = require("../schema/marco.schema");
 const { respondSuccess, respondError } = require("../utils/resHandler");
 const { handleError } = require("../utils/errorHandler");
 
@@ -47,6 +47,8 @@ async function getMarcoById(req, res) {
 async function createMarco(req, res) {
   try {
     const { body } = req;
+    const { error: bodyError } = marcoBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
 
     const [newMarco, errorMarco] = await MarcoService.createMarco(body);
 
@@ -71,6 +73,8 @@ async function updateMarco(req, res) {
   try {
     const { id } = req.params;
     const { body } = req;
+    const { error: bodyError } = marcoBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
 
     const [marco, errorMarco] = await MarcoService.updateMarco(id, body);
 

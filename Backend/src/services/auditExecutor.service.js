@@ -16,13 +16,42 @@ const SSHExecutorService = require("./sshExecutor.service");
 const { handleError } = require("../utils/errorHandler");
 
 /**
+ * Normaliza el sistema operativo del equipo
+ */
+function obtenerSistemaEquipo(equipo) {
 
-* Ejecuta una auditoría completa
-  */
+  const nombreOS =
+    equipo.nombreOS
+      ? equipo.nombreOS.toLowerCase().trim()
+      : "";
+
+  if (
+    nombreOS.includes("windows")
+  ) {
+    return "windows";
+  }
+
+  if (
+    nombreOS.includes("linux") ||
+    nombreOS.includes("ubuntu") ||
+    nombreOS.includes("debian") ||
+    nombreOS.includes("fedora") ||
+    nombreOS.includes("centos") ||
+    nombreOS.includes("redhat") ||
+    nombreOS.includes("red hat")
+  ) {
+    return "linux";
+  }
+
+  return null;
+}
+
+/**
+ * Ejecuta una auditoría completa
+ */
 async function ejecutarAuditoria(id_auditoria) {
 
   try {
-
 
     const auditoria = await Auditoria.findByPk(
       id_auditoria,
@@ -93,7 +122,6 @@ async function ejecutarAuditoria(id_auditoria) {
         empresa.Equipos &&
         empresa.Equipos.length > 0
       ) {
-
         equipos.push(
           ...empresa.Equipos
         );
@@ -115,6 +143,9 @@ async function ejecutarAuditoria(id_auditoria) {
 
     for (const equipo of equipos) {
 
+      const sistemaEquipo =
+        obtenerSistemaEquipo(equipo);
+
       console.log(
         `\n=====================================`
       );
@@ -125,6 +156,10 @@ async function ejecutarAuditoria(id_auditoria) {
 
       console.log(
         `Tipo conexión: ${equipo.tipo_conexion}`
+      );
+
+      console.log(
+        `Sistema equipo: ${sistemaEquipo || "no_detectado"}`
       );
 
       console.log(
@@ -147,6 +182,57 @@ async function ejecutarAuditoria(id_auditoria) {
             for (const script of parametro.Scripts) {
 
               try {
+
+                const sistemaScript =
+                  script.sistema_operativo
+                    ? script.sistema_operativo
+                        .toLowerCase()
+                        .trim()
+                    : "";
+
+                // ==========================================
+                // Filtrar scripts por sistema operativo
+                // ==========================================
+
+                if (
+                  sistemaEquipo &&
+                  sistemaScript &&
+                  sistemaEquipo !== sistemaScript
+                ) {
+
+                  console.log(
+                    `Script omitido: ${script.nombre} | Equipo: ${sistemaEquipo} | Script: ${sistemaScript}`
+                  );
+
+                  continue;
+                }
+
+                if (
+                  !sistemaEquipo
+                ) {
+
+                  resultados.push({
+                    equipo:
+                      equipo.hostname,
+
+                    ip:
+                      equipo.ip,
+
+                    marco:
+                      marco.nombre,
+
+                    control:
+                      control.nombre,
+
+                    parametro:
+                      parametro.nombre,
+
+                    error:
+                      "No se pudo determinar el sistema operativo del equipo"
+                  });
+
+                  continue;
+                }
 
                 let resultadoScript;
                 let errorScript;
@@ -187,6 +273,31 @@ async function ejecutarAuditoria(id_auditoria) {
                     );
                 }
 
+                else {
+
+                  resultados.push({
+                    equipo:
+                      equipo.hostname,
+
+                    ip:
+                      equipo.ip,
+
+                    marco:
+                      marco.nombre,
+
+                    control:
+                      control.nombre,
+
+                    parametro:
+                      parametro.nombre,
+
+                    error:
+                      "Tipo de conexión no soportado"
+                  });
+
+                  continue;
+                }
+
                 // ==========================================
                 // Error de ejecución
                 // ==========================================
@@ -197,6 +308,9 @@ async function ejecutarAuditoria(id_auditoria) {
 
                     equipo:
                       equipo.hostname,
+
+                    ip:
+                      equipo.ip,
 
                     marco:
                       marco.nombre,
@@ -209,6 +323,35 @@ async function ejecutarAuditoria(id_auditoria) {
 
                     error:
                       errorScript
+                  });
+
+                  continue;
+                }
+
+                if (
+                  !resultadoScript ||
+                  !resultadoScript.valor_obtenido
+                ) {
+
+                  resultados.push({
+
+                    equipo:
+                      equipo.hostname,
+
+                    ip:
+                      equipo.ip,
+
+                    marco:
+                      marco.nombre,
+
+                    control:
+                      control.nombre,
+
+                    parametro:
+                      parametro.nombre,
+
+                    error:
+                      "El script no retornó valor obtenido"
                   });
 
                   continue;
@@ -238,9 +381,9 @@ async function ejecutarAuditoria(id_auditoria) {
                     resultadoScript.valor_obtenido
                       .trim()
                       .toLowerCase() ===
-                      parametro.valor_esperado
-                        .trim()
-                        .toLowerCase()
+                    parametro.valor_esperado
+                      .trim()
+                      .toLowerCase()
                       ? "CUMPLE"
                       : "NO CUMPLE";
                 }
@@ -269,6 +412,7 @@ async function ejecutarAuditoria(id_auditoria) {
                 await equipo.addResultadoControl(
                   resultadoControl
                 );
+
                 resultados.push({
 
                   equipo:
@@ -305,6 +449,9 @@ async function ejecutarAuditoria(id_auditoria) {
 
                   equipo:
                     equipo.hostname,
+
+                  ip:
+                    equipo.ip,
 
                   marco:
                     marco.nombre,
@@ -347,7 +494,10 @@ async function ejecutarAuditoria(id_auditoria) {
               e.ip,
 
             tipo_conexion:
-              e.tipo_conexion
+              e.tipo_conexion,
+
+            nombreOS:
+              e.nombreOS
           })),
 
         resultados
@@ -356,9 +506,7 @@ async function ejecutarAuditoria(id_auditoria) {
       null
     ];
 
-
   } catch (error) {
-
 
     handleError(
       error,
@@ -369,8 +517,6 @@ async function ejecutarAuditoria(id_auditoria) {
       null,
       "Error ejecutando auditoría"
     ];
-
-
   }
 }
 

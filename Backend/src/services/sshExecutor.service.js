@@ -15,11 +15,20 @@ async function executeScript(script, equipo) {
     const scriptPath =
       path.resolve(script.ruta);
 
-    const scriptContent =
+    let scriptContent =
       fs.readFileSync(
         scriptPath,
         "utf8"
       );
+
+    if (
+      script.sistema_operativo === "linux" ||
+      script.tipo === "bash"
+    ) {
+      scriptContent =
+        scriptContent.replace(/\r\n/g, "\n")
+          .replace(/\r/g, "\n");
+    }
 
     return new Promise((resolve) => {
 
@@ -197,14 +206,20 @@ Invoke-Expression $script
       conn.on(
         "error",
         (error) => {
-
+          //console.error("===== ERROR SSH =====");
+          //console.error(error.message);
           return resolve([
             null,
             error.message
           ]);
         }
       );
-
+      console.log("===== DATOS SSH =====");
+      console.log({
+        host: equipo.ip,
+        port: equipo.ssh_puerto || 22,
+        username: equipo.ssh_usuario
+      });
       conn.connect({
 
         host:

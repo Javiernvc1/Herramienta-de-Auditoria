@@ -4,10 +4,12 @@ const EquipoService = require("../services/equipo.service");
 
 const { respondSuccess, respondError } = require("../utils/resHandler");
 const { handleError } = require("../utils/errorHandler");
+const { equipoBodySchema, equipoIdSchema } = require("../schema/equipo.schema");
 
 // Obtener todos los equipos
 async function getEquipos(req, res) {
   try {
+
     const [equipos, errorEquipos] = await EquipoService.getEquipos();
 
     if (errorEquipos) {
@@ -28,7 +30,8 @@ async function getEquipos(req, res) {
 async function getEquipoById(req, res) {
   try {
     const { id } = req.params;
-
+    const { error: paramsError } = equipoIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
     const [equipo, errorEquipo] = await EquipoService.getEquipoById(id);
 
     if (errorEquipo) {
@@ -47,9 +50,12 @@ async function getEquipoById(req, res) {
 async function createEquipo(req, res) {
   try {
     const { body } = req;
-
+    console.log("body", body);
+    const { error: bodyError } = equipoBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
+    console.log("body", bodyError);
     const [newEquipo, errorEquipo] = await EquipoService.createEquipo(body);
-
+    console.log("errorEquipo", errorEquipo);
     if (errorEquipo) {
       return respondError(req, res, 400, errorEquipo);
     }
@@ -71,6 +77,10 @@ async function updateEquipo(req, res) {
   try {
     const { id } = req.params;
     const { body } = req;
+    const { error: paramsError } = equipoIdSchema.validate({ id });
+    if (paramsError) return respondError(req, res, 400, paramsError.message);
+    const { error: bodyError } = equipoBodySchema.validate(body);
+    if (bodyError) return respondError(req, res, 400, bodyError.message);
 
     const [equipo, errorEquipo] = await EquipoService.updateEquipo(id, body);
 

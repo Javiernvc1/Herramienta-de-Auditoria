@@ -13,6 +13,8 @@ import {
 
 import { useAuth } from "../../context/AuthContext";
 
+import logo from "../../assets/logo-sisinf.png";
+
 export default function Login() {
 
   const navigate = useNavigate();
@@ -57,29 +59,38 @@ export default function Login() {
 
   return (
 
-    <Container
-      maxWidth="sm"
-      sx={{
-        height: "100vh",
-        display: "flex",
-        alignItems: "center"
-      }}
-    >
+    <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(166, 164, 164, 0.75)", px: 2 }}>
 
-      <Paper
-        elevation={3}
+      <Container
+        maxWidth="sm"
         sx={{
-          width: "100%",
-          p: 4
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
         }}
       >
+
+        <Paper
+          elevation={3}
+          sx={{
+            width: "100%",
+            p: 4,
+            backgroundColor: "rgb(255, 249, 249)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(0, 0, 0, 0.08)"
+          }}
+        >
+
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <img src={logo} alt="Logo" style={{ width: "100px" }} />
+        </Box>
 
         <Typography
           variant="h4"
           align="center"
           gutterBottom
         >
-          Sistema de Auditoría
+          Sistema de Auditoría - SISINF
         </Typography>
 
         <Typography
@@ -137,8 +148,10 @@ export default function Login() {
 
         </Box>
 
-      </Paper>
+        </Paper>
 
-    </Container>
+      </Container>
+
+    </Box>
   );
 }

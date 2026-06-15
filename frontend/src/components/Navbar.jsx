@@ -19,19 +19,28 @@ export default function Navbar() {
     logout
   } = useAuth();
 
+  const drawerWidth = 240;
+
   return (
 
     <AppBar
       position="fixed"
       elevation={1}
-      color="inherit"
+      color="default"
+      sx={{
+        width: `calc(100% - ${drawerWidth}px)`,
+        ml: `${drawerWidth}px`,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        backgroundColor: "rgba(238, 238, 238, 0.79)",
+        backdropFilter: "blur(10px)"
+      }}
     >
 
-      <Toolbar>
-
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        
         <Typography
           variant="h6"
-          sx={{ flexGrow: 1 }}
+          sx={{ flexGrow: 1, textAlign: "left" }}
         >
           Sistema de Auditoría
         </Typography>
