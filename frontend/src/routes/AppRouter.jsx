@@ -80,7 +80,7 @@ export default function AppRouter() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "AUDITOR"]}>
               <DashboardLayout>
                 <Dashboard />
               </DashboardLayout>
@@ -93,7 +93,7 @@ export default function AppRouter() {
         <Route
           path="/auditorias"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "AUDITOR"]}>
               <DashboardLayout>
                 <Auditorias />
               </DashboardLayout>
@@ -104,7 +104,7 @@ export default function AppRouter() {
         <Route
           path="/auditorias/crear"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "AUDITOR"]}>
               <DashboardLayout>
                 <CrearAuditoria />
               </DashboardLayout>
@@ -115,7 +115,7 @@ export default function AppRouter() {
         <Route
           path="/auditorias/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "AUDITOR"]}>
               <DashboardLayout>
                 <DetalleAuditoria />
               </DashboardLayout>
@@ -128,7 +128,7 @@ export default function AppRouter() {
         <Route
           path="/empresas"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "AUDITOR"]}>
               <DashboardLayout>
                 <Empresas />
               </DashboardLayout>
@@ -136,12 +136,12 @@ export default function AppRouter() {
           }
         />
 
-        {/* USUARIOS */}
 
+        {/* USUARIOS */}
         <Route
           path="/usuarios"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <DashboardLayout>
                 <Usuarios />
               </DashboardLayout>
@@ -154,7 +154,7 @@ export default function AppRouter() {
         <Route
           path="/marcos"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <DashboardLayout>
                 <Marcos />
               </DashboardLayout>
@@ -167,7 +167,7 @@ export default function AppRouter() {
         <Route
           path="/controles"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <DashboardLayout>
                 <Controles />
               </DashboardLayout>
@@ -181,7 +181,7 @@ export default function AppRouter() {
         <Route
           path="/resultados/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN", "AUDITOR"]}>
               <DashboardLayout>
                 <ResultadoDetalle />
               </DashboardLayout>

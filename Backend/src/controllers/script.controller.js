@@ -54,7 +54,6 @@ async function createScript(req, res) {
     console.log("body", body);
     const { error: bodyError, value } = scriptBodySchema.validate(body);
     if (bodyError) return respondError(req, res, 400, bodyError.message);
-
     const [newScript, errorScript] = await ScriptService.createScript(value, file);
     
     if (errorScript) {

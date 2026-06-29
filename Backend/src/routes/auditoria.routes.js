@@ -45,7 +45,7 @@ router.put(
 router.delete(
   "/:id",
   verifyJWT,
-  verifyRole("ADMIN"),
+  verifyRole("ADMIN", "AUDITOR"),
   auditoriaController.deleteAuditoria
 );
 

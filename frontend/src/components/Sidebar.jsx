@@ -14,11 +14,11 @@ import {
   Business,
   Security,
   Settings,
-  People,
-  Summarize
+  People
 } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import logo from "../assets/logo-sisinf.png";
 
@@ -28,41 +28,58 @@ export default function Sidebar() {
 
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
+  const userRoles =
+    user?.roles || [];
+
   const items = [
     {
       text: "Dashboard",
       icon: <Dashboard />,
-      path: "/"
+      path: "/",
+      roles: ["ADMIN", "AUDITOR"]
     },
     {
       text: "Auditorías",
       icon: <Assignment />,
-      path: "/auditorias"
+      path: "/auditorias",
+      roles: ["ADMIN", "AUDITOR"]
     },
     {
       text: "Empresas",
       icon: <Business />,
-      path: "/empresas"
+      path: "/empresas",
+      roles: ["ADMIN", "AUDITOR"]
     },
     {
       text: "Marcos",
       icon: <Security />,
-      path: "/marcos"
+      path: "/marcos",
+      roles: ["ADMIN"]
     },
     {
       text: "Controles",
       icon: <Settings />,
-      path: "/controles"
+      path: "/controles",
+      roles: ["ADMIN"]
     },
     {
       text: "Usuarios",
       icon: <People />,
-      path: "/usuarios"
+      path: "/usuarios",
+      roles: ["ADMIN"]
     }
   ];
 
-  return (
+  const filteredItems =
+    items.filter((item) =>
+      item.roles.some((role) =>
+        userRoles.includes(role)
+      )
+    );
 
+  return (
     <Drawer
       variant="permanent"
       sx={{
@@ -77,8 +94,8 @@ export default function Sidebar() {
         }
       }}
     >
-
       <Toolbar />
+
       <Box
         sx={{
           display: "flex",
@@ -86,20 +103,21 @@ export default function Sidebar() {
           mb: 2
         }}
       >
-        <img src={logo} alt="Logo" style={{ width: "100px" }} />
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ width: "100px" }}
+        />
       </Box>
 
       <List>
-
-        {items.map((item) => (
-
+        {filteredItems.map((item) => (
           <ListItemButton
             key={item.text}
             onClick={() =>
               navigate(item.path)
             }
           >
-
             <ListItemIcon>
               {item.icon}
             </ListItemIcon>
@@ -107,13 +125,9 @@ export default function Sidebar() {
             <ListItemText
               primary={item.text}
             />
-
           </ListItemButton>
-
         ))}
-
       </List>
-
     </Drawer>
   );
 }

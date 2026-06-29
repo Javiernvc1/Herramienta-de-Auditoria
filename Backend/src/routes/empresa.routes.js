@@ -16,12 +16,12 @@ router.get("/",verifyJWT,verifyRole("ADMIN", "AUDITOR"),empresaController.getEmp
 router.get("/:id",verifyJWT,verifyRole("ADMIN", "AUDITOR"),empresaController.getEmpresaById);
 
 // Crear empresa
-router.post("/",verifyJWT,verifyRole("ADMIN"),empresaController.createEmpresa);
+router.post("/",verifyJWT,verifyRole("ADMIN", "AUDITOR"),empresaController.createEmpresa);
 
 // Actualizar empresa
-router.put("/:id",verifyJWT,verifyRole("ADMIN"),empresaController.updateEmpresa);
+router.put("/:id",verifyJWT,verifyRole("ADMIN", "AUDITOR"),empresaController.updateEmpresa);
 
 // Eliminar empresa
-router.delete("/:id",verifyJWT,verifyRole("ADMIN"),empresaController.deleteEmpresa);
+router.delete("/:id",verifyJWT,verifyRole("ADMIN", "AUDITOR"),empresaController.deleteEmpresa);
 
 module.exports = router;

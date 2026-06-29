@@ -29,7 +29,7 @@ router.get(
 router.post(
   "/",
   verifyJWT,
-  verifyRole("ADMIN"),
+  verifyRole("ADMIN", "AUDITOR"),
   equipoController.createEquipo
 );
 
@@ -37,7 +37,7 @@ router.post(
 router.put(
   "/:id",
   verifyJWT,
-  verifyRole("ADMIN"),
+  verifyRole("ADMIN", "AUDITOR"),
   equipoController.updateEquipo
 );
 
@@ -45,7 +45,7 @@ router.put(
 router.delete(
   "/:id",
   verifyJWT,
-  verifyRole("ADMIN"),
+  verifyRole("ADMIN", "AUDITOR"),
   equipoController.deleteEquipo
 );
 
